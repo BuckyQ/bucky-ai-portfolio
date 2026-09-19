@@ -1,4 +1,4 @@
-# Bucky AI Portfolio - Agent Rules
+# Bucky Qian Portfolio - Agent Rules
 
 These instructions apply to every AI-assisted change in this repository. Read
 this file before inspecting or editing the application.
@@ -50,6 +50,12 @@ The approved visual rhythm is:
    - Pipeline / RAG + Evaluation System
 4. Short typography / Background
 5. Minimal / Contact
+
+Visible section labels must remain sequential and use this exact system:
+`01 / PROFILE`, `02 / SELECTED WORK`, `02.1 / TOPIFY AI`,
+`02.2 / AI JOB INTELLIGENCE AGENT`, `02.3 / RAG + EVALUATION SYSTEM`,
+`03 / BACKGROUND`, and `04 / CONTACT`. Primary navigation uses `ABOUT`,
+`SELECTED WORK`, `BACKGROUND`, and `CONTACT`.
 
 Everything after Hero should be concise and recruiter-scannable. The site must
 prove production engineering experience, real AI product work at Topify, and
@@ -152,6 +158,10 @@ merge content that does not strengthen one of those three points.
 - Keep the section concise enough for recruiter scanning. Do not turn any item
   into a long-form case study and do not add more projects without an explicit
   request.
+- Keep one secondary `Q /` annotation in each project introduction: what Bucky
+  built at Topify, how the Job Intelligence Agent works, and how RAG quality is
+  evaluated. Answers must be direct, factual, and immediately follow the
+  question. Do not expand these annotations into an FAQ or add FAQ schema.
 
 #### 3.1 Topify AI
 
@@ -168,6 +178,8 @@ merge content that does not strengthen one of those three points.
 - Keep the second visual near a desktop maximum of `760px` by `560px`, with a
   focused crop and generous negative space. Keep it near `420px` high on tablet
   and `300-350px` high on mobile.
+- Label shipped Topify interfaces as `PRODUCTION` or `PRODUCTION INTERFACE`.
+  Do not use `LIVE` or wording that implies current operation or maintenance.
 
 #### 3.2 AI Job Intelligence Agent
 
@@ -192,9 +204,9 @@ merge content that does not strengthen one of those three points.
 ### 4. Background
 
 - Keep this as a short typography-only section around `50-65vh` on desktop.
-- Use the heading `Frontend instincts. Applied AI systems.` and only the concise
-  explanation that model capability matters when users understand the system,
-  trust the result, and can act on it.
+- Use the heading `Frontend instincts. Applied AI systems.` with one secondary
+  question about why frontend experience matters for Applied AI and one direct
+  answer about latency, uncertainty, model state, accessibility, and trust.
 - Do not restore `From model behavior to human behavior`, three principle
   blocks, Build / Expose / Measure cards, screenshots, or another large
   transition statement.
@@ -211,6 +223,9 @@ merge content that does not strengthen one of those three points.
 - Keep the footer minimal and retain enough identity context to associate it
   with Bucky Qian and Applied AI Engineering. Do not add a lead form, signal
   circle, or decorative system graphic.
+- Keep the machine-readable freshness label `LAST UPDATED / SEP 2026` in the
+  ruled footer metadata row and back it with a semantic `time` element using
+  the real content update date.
 
 ## Content And Asset Readiness
 
@@ -250,6 +265,9 @@ site, or animation showcase that obscures the candidate's work.
   - Email: `BuckQianWorking@gmail.com`
   - GitHub: `https://github.com/BuckyQ`
   - LinkedIn: `https://www.linkedin.com/in/hao-q-156421170/`
+- Use `https://topify.ai/` as the verified public product link for Topify. Do
+  not label a repository as project source unless that repository has been
+  verified to contain the project shown on the site.
 - If a design needs undocumented content, use neutral labels or ask for the
   missing facts. Never present placeholder achievements as real experience.
 
@@ -535,9 +553,10 @@ traffic or broad high-volume keywords.
 
 ### Structured Data And Entity Consistency
 
-- Use valid JSON-LD for `Person` and `ProfilePage` on the portfolio homepage.
-  Add `WebSite`, `Article`, `CreativeWork`, or `SoftwareSourceCode` only when
-  the visible content genuinely supports that type.
+- Keep one JSON-LD `@graph` containing the homepage's `WebSite`, `ProfilePage`,
+  and `Person` entities. Connect them with `publisher`, `mainEntity`, `about`,
+  `author`, and `isPartOf`. Add `Article`, `CreativeWork`, or
+  `SoftwareSourceCode` only when the visible content genuinely supports it.
 - JSON-LD must match visible content and the resume source of truth. Never add
   unsupported ratings, awards, employers, job titles, dates, metrics, or
   `sameAs` profiles.
@@ -547,6 +566,13 @@ traffic or broad high-volume keywords.
 - Use stable project names and terminology across headings, descriptions,
   metadata, and structured data so search and answer engines can connect each
   project to the same entity.
+- Treat `https://buckyqian.com` as the canonical production URL. Use
+  `Bucky Qian | Applied AI Engineer` as the page title and `Bucky Qian` as the
+  site and person entity name across metadata, Open Graph, and schema.
+- Keep the entity IDs stable as `https://buckyqian.com/#website`,
+  `https://buckyqian.com/#profile`, and `https://buckyqian.com/#person`.
+  Keep the verified LinkedIn and GitHub URLs in `Person.sameAs`, and do not add
+  a meta keywords tag.
 - Validate structured data after meaningful metadata or content changes.
 
 ### Generative Engine Optimization
@@ -571,6 +597,10 @@ traffic or broad high-volume keywords.
 - Do not create `llms.txt`, FAQ schema, or AI-crawler-specific files as empty
   SEO theater. Add them only when they contain useful, maintained, public
   information and are consistent with the site.
+- Do not create a Terms page solely for an SEO or audit score. Before a future
+  Mini RAG assistant begins collecting prompts, analytics, or logs, add a
+  concise Privacy page that accurately explains the collected data, purpose,
+  retention, and contact path, then link it from the site.
 - Ensure answer engines can extract direct answers to these questions from
   visible HTML without guessing:
   - Who is Bucky Qian?
@@ -614,6 +644,15 @@ After changing public content, routes, metadata, navigation, or rendering:
 - Prevent text, navigation, diagrams, and buttons from clipping or overlapping.
 - Use semantic HTML, logical headings, keyboard-operable controls, visible
   focus states, descriptive labels, and sufficient contrast.
+- Keep `Skip to main content` as the first focusable control and preserve
+  `#main-content` as its target. Anchored sections must account for the fixed
+  header with scroll padding or scroll margin.
+- The mobile menu must expose `aria-expanded`, `aria-controls`, and an accurate
+  label; move focus into the open menu, contain keyboard focus while it is
+  open, close on Escape, and return focus to the trigger.
+- Keep meaningful mobile actions near a `44px` minimum touch target and use a
+  clear `2px` `:focus-visible` indicator. Small technical copy must remain
+  readable at WCAG AA contrast; decorative grid lines may remain subdued.
 - Decorative graphics must be hidden from assistive technology. Meaningful
   content cannot exist only inside a canvas or animation.
 - Preserve `prefers-reduced-motion` support. Accessibility regressions are

@@ -3,7 +3,7 @@
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight, Download, Menu, X } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ElectronicOcean from "./components/ElectronicOcean";
 
 const signalBars = [31, 44, 38, 62, 48, 72, 54, 81, 67, 92, 58, 76, 45, 69, 52, 86, 63, 96, 74, 88, 66, 78, 59, 70];
@@ -46,45 +46,77 @@ const ragEvaluation = ["Precision@K", "Recall@K", "Faithfulness", "Answer Releva
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "ProfilePage",
-  mainEntity: {
-    "@type": "Person",
-    name: "Bucky Qian",
-    jobTitle: "Applied AI Engineer",
-    email: "mailto:BuckQianWorking@gmail.com",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Mountain View",
-      addressRegion: "CA",
-      addressCountry: "US",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://buckyqian.com/#website",
+      url: "https://buckyqian.com/",
+      name: "Bucky Qian",
+      publisher: { "@id": "https://buckyqian.com/#person" },
     },
-    alumniOf: [
-      { "@type": "CollegeOrUniversity", name: "Trine University" },
-      { "@type": "CollegeOrUniversity", name: "University of California, Santa Cruz" },
-    ],
-    sameAs: [
-      "https://github.com/BuckyQ",
-      "https://www.linkedin.com/in/hao-q-156421170/",
-    ],
-    knowsAbout: [
-      "Applied AI Engineering",
-      "AI Agents",
-      "Retrieval-Augmented Generation",
-      "Large Language Model Applications",
-      "TypeScript",
-      "React",
-    ],
-  },
+    {
+      "@type": "ProfilePage",
+      "@id": "https://buckyqian.com/#profile",
+      url: "https://buckyqian.com/",
+      name: "Bucky Qian | Applied AI Engineer",
+      description:
+        "Applied AI Engineer building AI agents, RAG systems, evaluation pipelines, and production AI interfaces.",
+      dateModified: "2026-09-19",
+      isPartOf: { "@id": "https://buckyqian.com/#website" },
+      mainEntity: { "@id": "https://buckyqian.com/#person" },
+      about: { "@id": "https://buckyqian.com/#person" },
+      author: { "@id": "https://buckyqian.com/#person" },
+      publisher: { "@id": "https://buckyqian.com/#person" },
+    },
+    {
+      "@type": "Person",
+      "@id": "https://buckyqian.com/#person",
+      name: "Bucky Qian",
+      url: "https://buckyqian.com/",
+      jobTitle: "Applied AI Engineer",
+      description:
+        "Applied AI Engineer building AI agents, RAG systems, evaluation pipelines, and production AI interfaces.",
+      email: "mailto:BuckQianWorking@gmail.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Mountain View",
+        addressRegion: "CA",
+        addressCountry: "US",
+      },
+      alumniOf: [
+        { "@type": "CollegeOrUniversity", name: "Trine University" },
+        { "@type": "CollegeOrUniversity", name: "University of California, Santa Cruz" },
+      ],
+      sameAs: [
+        "https://www.linkedin.com/in/hao-q-156421170/",
+        "https://github.com/BuckyQ",
+      ],
+      knowsAbout: [
+        "Applied AI",
+        "AI Agents",
+        "RAG",
+        "RAG Evaluation",
+        "LLM Applications",
+        "Tool Calling",
+        "Structured Outputs",
+        "TypeScript",
+        "React",
+        "Next.js",
+      ],
+    },
+  ],
 };
 
 function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 48 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 48 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-12%" }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -151,7 +183,7 @@ function ProductViewport({
       <div className="product-viewport-head">
         <span>{label}</span>
         <span>Topify AI</span>
-        <span className="product-live"><i /> Live</span>
+        <span className="product-status"><i /> Production</span>
       </div>
       <div className="product-viewport-image">
         <Image
@@ -219,7 +251,7 @@ function RagAmbient() {
 
   return (
     <div className="rag-ambient" aria-hidden="true">
-      <span className="rag-ambient-marker marker-a">VECTOR / FIELD 03.3</span>
+      <span className="rag-ambient-marker marker-a">VECTOR / FIELD 02.3</span>
       <span className="rag-ambient-marker marker-b">INDEX / 07</span>
       {["path-a", "path-b", "path-c"].map((path, index) => (
         <i className={`rag-ambient-path ${path}`} key={path}>
@@ -239,6 +271,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileNavRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.055]);
   const oceanOpacity = useTransform(scrollYProgress, [0, 0.58, 1], [1, 0.88, 0.14]);
@@ -247,31 +281,90 @@ export default function Home() {
   const heroLift = useTransform(scrollYProgress, [0, 0.5, 1], [0, -10, -76]);
   const transitionShade = useTransform(scrollYProgress, [0, 0.55, 1], [0.08, 0.32, 1]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const menu = mobileNavRef.current;
+    const menuButton = menuButtonRef.current;
+    const menuLinks = Array.from(menu?.querySelectorAll<HTMLAnchorElement>("a[href]") ?? []);
+    menuLinks[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMenuOpen(false);
+        window.requestAnimationFrame(() => menuButton?.focus());
+        return;
+      }
+
+      if (event.key !== "Tab" || !menuButton || menuLinks.length === 0) return;
+
+      const focusableElements: HTMLElement[] = [...menuLinks, menuButton];
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
+  const closeMobileMenu = () => {
+    const shouldRestoreFocus = menuOpen;
+    setMenuOpen(false);
+    if (shouldRestoreFocus) {
+      window.requestAnimationFrame(() => menuButtonRef.current?.focus());
+    }
+  };
+
   return (
-    <main>
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <a className="skip-link" href="#main-content">Skip to main content</a>
 
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="Bucky Qian home">
           Bucky Qian <span>Applied AI Engineer</span>
         </a>
-        <nav className={menuOpen ? "nav-open" : ""} aria-label="Primary navigation">
-          <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
-          <a href="#work" onClick={() => setMenuOpen(false)}>Selected work</a>
-          <a href="#approach" onClick={() => setMenuOpen(false)}>Approach</a>
-          <a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
-          <a className="mobile-nav-cta" href="mailto:BuckQianWorking@gmail.com" onClick={() => setMenuOpen(false)}>
+        <nav
+          className={menuOpen ? "nav-open" : ""}
+          id="primary-navigation"
+          ref={mobileNavRef}
+          aria-label="Primary navigation"
+        >
+          <a href="#about" onClick={closeMobileMenu}>About</a>
+          <a href="#work" onClick={closeMobileMenu}>Selected work</a>
+          <a href="#background" onClick={closeMobileMenu}>Background</a>
+          <a href="#contact" onClick={closeMobileMenu}>Contact</a>
+          <a className="mobile-nav-cta" href="mailto:BuckQianWorking@gmail.com" onClick={closeMobileMenu}>
             Start a conversation <ArrowUpRight size={16} />
           </a>
         </nav>
         <a className="header-contact" href="mailto:BuckQianWorking@gmail.com">
           Start a conversation <ArrowUpRight size={15} />
         </a>
-        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation" aria-expanded={menuOpen}>
+        <button
+          className="menu-button"
+          ref={menuButtonRef}
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-controls="primary-navigation"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+        >
           <span>{menuOpen ? "Close" : "Menu"}</span>
           {menuOpen ? <X size={17} /> : <Menu size={17} />}
         </button>
       </header>
+
+      <main id="main-content" tabIndex={-1}>
 
       <section className="hero" id="top" ref={heroRef} aria-labelledby="hero-title">
         <motion.div
@@ -352,7 +445,7 @@ export default function Home() {
             <Image
               className="profile-photo"
               src="/pdf/01_head.jpeg"
-              alt="Portrait of Bucky Qian"
+              alt="Portrait of Bucky Qian."
               fill
               sizes="(max-width: 900px) 100vw, 36vw"
             />
@@ -391,7 +484,7 @@ export default function Home() {
       <section className="selected-work" id="work" aria-labelledby="selected-work-title">
         <div className="selected-work-inner">
           <ProjectReveal className="selected-work-header">
-            <p className="section-label">03 / Selected work</p>
+            <p className="section-label">02 / Selected Work</p>
             <h2 id="selected-work-title">Selected work.</h2>
             <p>Production AI product work, agent orchestration, and retrieval evaluation.</p>
           </ProjectReveal>
@@ -400,12 +493,16 @@ export default function Home() {
             <AmbientSweep className="topify-ambient-sweep" />
             <ProjectReveal className="work-project-header topify-project-header">
               <div>
-                <p className="section-label">03.1 / Topify AI</p>
+                <p className="section-label">02.1 / Topify AI</p>
                 <h3 id="topify-title">Topify AI</h3>
                 <p className="work-project-kicker">Production AI Search Intelligence</p>
               </div>
-              <div className="work-project-summary">
+              <div className="work-project-summary geo-answer">
+                <h4 className="geo-question">Q / WHAT DID I BUILD AT TOPIFY AI?</h4>
                 <p>I owned core product experiences across realtime AI analysis, prompt tracking, competitor intelligence, reporting, onboarding, and conversion.</p>
+                <a className="geo-proof-link" href="https://topify.ai/" target="_blank" rel="noreferrer">
+                  Public product <ArrowUpRight aria-hidden="true" />
+                </a>
                 <div className="work-project-focus" aria-label="Topify key systems">
                   {projectFocus.map((item) => <span key={item}>{item}</span>)}
                 </div>
@@ -416,7 +513,7 @@ export default function Home() {
               <p className="project-view-label">01 / Product overview</p>
               <ProductViewport
                 src="/topify/topify-overview.png"
-                alt="Topify AI production overview dashboard showing visibility, sentiment, position, share of voice, competitors, and agent actions"
+                alt="Topify AI dashboard showing AI visibility, competitor rankings, sentiment, position, and share of voice."
                 width={4000}
                 height={2500}
                 label="Product system / Overview"
@@ -436,7 +533,7 @@ export default function Home() {
               <div className="topify-detail-media">
                 <ProductViewport
                   src="/topify/topify-realtime.png"
-                  alt="Topify AI realtime analysis progress and generated optimization action"
+                  alt="Topify realtime AI analysis interface showing planning, running, and progressive execution states."
                   width={1616}
                   height={1560}
                   label="Realtime system / Agent detail"
@@ -451,10 +548,13 @@ export default function Home() {
             <AgentAmbient />
             <ProjectReveal className="work-project-header technical-project-header">
               <div>
-                <p className="section-label">03.2 / AI Job Intelligence Agent</p>
+                <p className="section-label">02.2 / AI Job Intelligence Agent</p>
                 <h3 id="agent-title">AI Job Intelligence Agent</h3>
               </div>
-              <p>A coordinated agent workflow that connects role research, fit analysis, resume evidence, and interview strategy.</p>
+              <div className="geo-answer technical-project-answer">
+                <h4 className="geo-question">Q / HOW DOES THE AI JOB INTELLIGENCE AGENT WORK?</h4>
+                <p>It coordinates company research, job analysis, resume evidence, and interview strategy through a planner-led multi-agent workflow.</p>
+              </div>
             </ProjectReveal>
             <ProjectReveal className="job-agent-diagram">
               <div className="diagram-chain diagram-chain-top">
@@ -490,10 +590,13 @@ export default function Home() {
             <RagAmbient />
             <ProjectReveal className="work-project-header technical-project-header">
               <div>
-                <p className="section-label">03.3 / RAG + Evaluation System</p>
+                <p className="section-label">02.3 / RAG + Evaluation System</p>
                 <h3 id="rag-title">RAG + Evaluation System</h3>
               </div>
-              <p>A retrieval pipeline designed to measure evidence quality before treating an answer as trustworthy.</p>
+              <div className="geo-answer technical-project-answer">
+                <h4 className="geo-question">Q / HOW DO I EVALUATE RAG?</h4>
+                <p>I evaluate retrieval and generation separately using Precision@K, Recall@K, faithfulness, and answer relevance.</p>
+              </div>
             </ProjectReveal>
             <div className="rag-project-pipeline" aria-label="Retrieval-Augmented Generation pipeline">
               {ragStages.map((stage, index) => (
@@ -511,23 +614,24 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="background-section" id="approach" aria-labelledby="background-title">
+      <section className="background-section" id="background" aria-labelledby="background-title">
         <div className="background-section-inner">
-          <p className="section-label">04 / Background</p>
+          <p className="section-label">03 / Background</p>
           <Reveal className="background-heading">
             <h2 id="background-title">Frontend instincts.<br /><em>Applied AI systems.</em></h2>
           </Reveal>
           <Reveal className="background-copy">
-            <p>Years of product engineering taught me that model capability is only useful when users can understand what the system is doing, trust the result, and act on it.</p>
-            <p>That is the perspective I bring to Applied AI.</p>
+            <h3 className="geo-question">Q / WHY DOES FRONTEND EXPERIENCE MATTER FOR APPLIED AI?</h3>
+            <p>Frontend engineering taught me to design around latency, uncertainty, model state, accessibility, and user trust.</p>
           </Reveal>
         </div>
       </section>
+      </main>
 
       <footer id="contact">
         <div className="contact-ambient" aria-hidden="true"><i /><i /><i /></div>
         <div className="contact-main">
-          <p className="section-label">05 / Contact</p>
+          <p className="section-label">04 / Contact</p>
           <h2>Let&apos;s build<br />something useful.</h2>
           <nav className="contact-links" aria-label="Contact links">
             <a href="mailto:BuckQianWorking@gmail.com">Email</a>
@@ -540,10 +644,13 @@ export default function Home() {
           </a>
         </div>
         <div className="footer-meta">
-          <p>Bucky Qian · Applied AI Engineer<br />Mountain View, California</p>
+          <p>
+            Bucky Qian · Applied AI Engineer<br />Mountain View, California
+            <time className="footer-freshness" dateTime="2026-09-19">Last updated / Sep 2026</time>
+          </p>
           <span>© 2026 Bucky Qian</span>
         </div>
       </footer>
-    </main>
+    </>
   );
 }

@@ -12,35 +12,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://buckyqian.com/";
+const siteTitle = "Bucky Qian | Applied AI Engineer";
+const siteDescription =
+  "Bucky Qian is an Applied AI Engineer with 4+ years across Apple and Topify AI, building AI agents, RAG systems, LLM applications, and production interfaces.";
+
 export const metadata: Metadata = {
-  title: "Bucky Qian | Applied AI Engineer in Mountain View",
-  description:
-    "Bucky Qian is an Applied AI Engineer with 4+ years across Apple and Topify AI, building AI agents, RAG systems, LLM applications, and production interfaces.",
-  applicationName: "Bucky Qian Portfolio",
+  metadataBase: new URL(siteUrl),
+  title: siteTitle,
+  description: siteDescription,
+  applicationName: "Bucky Qian",
   authors: [{ name: "Bucky Qian" }],
   creator: "Bucky Qian",
-  keywords: [
-    "Bucky Qian",
-    "Applied AI Engineer",
-    "Frontend Engineer",
-    "AI Agents",
-    "Retrieval-Augmented Generation",
-    "LLM Applications",
-    "TypeScript",
-    "Mountain View",
-  ],
   openGraph: {
     type: "profile",
-    title: "Bucky Qian | Applied AI Engineer",
-    description:
-      "Frontend engineer turned Applied AI Engineer, building AI agents, RAG systems, and production LLM applications.",
-    siteName: "Bucky Qian Portfolio",
+    title: siteTitle,
+    description: siteDescription,
+    siteName: "Bucky Qian",
   },
   twitter: {
     card: "summary",
-    title: "Bucky Qian | Applied AI Engineer",
-    description:
-      "AI systems with frontend product instinct. Experience across Apple and Topify AI.",
+    title: siteTitle,
+    description: siteDescription,
   },
   robots: {
     index: true,
@@ -51,6 +44,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <head>
+        <link rel="canonical" href={siteUrl} />
+        <meta property="og:url" content={siteUrl} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
