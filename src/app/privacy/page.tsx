@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy | Bucky Qian",
   description:
-    "How the Ask Bucky AI portfolio demo processes and stores unanswered questions.",
+    "How the Ask Bucky AI portfolio demo handles questions, voice recordings, temporary documents, and unanswered-question feedback.",
   alternates: {
     canonical: "https://buckyqian.com/privacy",
   },
@@ -23,8 +23,8 @@ export default function PrivacyPage() {
         <p className="section-label">Data note / Ask Bucky AI</p>
         <h1>Privacy, kept <em>plain.</em></h1>
         <p>
-          Ask Bucky is a portfolio demo. It uses submitted questions to retrieve
-          public professional information and generate grounded answers.
+          Ask Bucky is a portfolio demo. It uses submitted questions and any
+          temporary context you choose to provide to generate grounded answers.
         </p>
       </header>
 
@@ -37,6 +37,7 @@ export default function PrivacyPage() {
               When the assistant cannot answer a valid professional question,
               it may save the question text, a failure category, the highest
               retrieval score, review status, and creation time in Supabase.
+              Uploaded document text is never included in that record.
             </p>
           </div>
         </section>
@@ -57,17 +58,35 @@ export default function PrivacyPage() {
         <section aria-labelledby="privacy-purpose">
           <p>03 / Purpose</p>
           <div>
-            <h2 id="privacy-purpose">Human review only</h2>
+            <h2 id="privacy-purpose">Temporary AI processing</h2>
             <p>
-              Saved questions are reviewed to identify gaps in Bucky&apos;s public
-              profile. They are never added automatically to the knowledge base
-              and may be retained until reviewed or deleted.
+              Voice audio is sent through this site&apos;s server to OpenAI for
+              transcription, then discarded by the application. PDF and TXT
+              files are parsed for the current assistant session only. Selected
+              text may be sent to OpenAI with a question to produce the answer,
+              but files and extracted text are not placed in Supabase Storage or
+              Bucky&apos;s permanent profile index.
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="privacy-retention">
+          <p>04 / Retention</p>
+          <div>
+            <h2 id="privacy-retention">What remains</h2>
+            <p>
+              Temporary audio and document context expire when the current page
+              session ends or the attachment is removed. Separately, eligible
+              unanswered question text may be retained for human review until it
+              is reviewed or deleted. Hashed network identifiers are used only to
+              enforce daily demo limits; raw IP addresses are not stored by the
+              application.
             </p>
           </div>
         </section>
 
         <section aria-labelledby="privacy-contact">
-          <p>04 / Contact</p>
+          <p>05 / Contact</p>
           <div>
             <h2 id="privacy-contact">Questions or removal requests</h2>
             <p>

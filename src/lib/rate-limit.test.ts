@@ -5,6 +5,7 @@ import { AI_CONFIG } from "@/config/ai";
 import { createMemoryDailyRateLimitStore } from "./rate-limit-core";
 import {
   createSupabaseDailyRateLimitStore,
+  reserveAiOperation,
   reserveAiQuestion,
   type RateLimitRpcClient,
 } from "./rate-limit";
@@ -94,6 +95,27 @@ describe("daily rate limiting", () => {
     expect(store.reserve.mock.calls[0]?.[0].key).toMatch(
       /^ask-bucky:daily:[a-f0-9]{64}$/,
     );
+  });
+
+  it("isolates voice and document operation namespaces", async () => {
+    const store = createMemoryDailyRateLimitStore(() => 4_000);
+    const request = new Request("http://localhost/api/transcribe", {
+      headers: { "x-forwarded-for": "198.51.100.9" },
+    });
+
+    const voice = await reserveAiOperation(
+      request,
+      { namespace: "voice-active", limit: 1, windowSeconds: 60 },
+      store,
+    );
+    const document = await reserveAiOperation(
+      request,
+      { namespace: "document-active", limit: 1, windowSeconds: 60 },
+      store,
+    );
+
+    expect(voice.allowed).toBe(true);
+    expect(document.allowed).toBe(true);
   });
 
   it("refuses the process-memory backend in production", async () => {

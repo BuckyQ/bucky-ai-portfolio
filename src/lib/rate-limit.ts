@@ -89,7 +89,7 @@ function getUpstashConfig(): UpstashConfig | null {
   return { url: url.replace(/\/$/, ""), token };
 }
 
-function getRateLimitKey(request: Request): string {
+function getRateLimitKey(request: Request, namespace: string): string {
   const forwardedFor =
     request.headers.get("x-vercel-forwarded-for") ??
     request.headers.get("x-forwarded-for");
@@ -98,10 +98,10 @@ function getRateLimitKey(request: Request): string {
     request.headers.get("x-real-ip")?.trim() ||
     "local-development";
   const fingerprint = createHash("sha256")
-    .update(`ask-bucky:${clientIp}`)
+    .update(`ask-bucky:${namespace}:${clientIp}`)
     .digest("hex");
 
-  return `ask-bucky:daily:${fingerprint}`;
+  return `ask-bucky:${namespace}:${fingerprint}`;
 }
 
 async function upstashCommand(
@@ -273,23 +273,43 @@ function getDailyRateLimitStore(): DailyRateLimitStore {
   return memoryRateLimitStore;
 }
 
-export async function reserveAiQuestion(
+export async function reserveAiOperation(
   request: Request,
+  options: { namespace: string; limit: number; windowSeconds: number },
   store: DailyRateLimitStore = getDailyRateLimitStore(),
 ): Promise<RateLimitReservation> {
+  if (!/^[a-z0-9-]{1,24}$/.test(options.namespace)) {
+    throw new Error("Rate-limit namespace is invalid.");
+  }
+
   const reservation = await store.reserve({
-    key: getRateLimitKey(request),
-    limit: AI_CONFIG.dailyIpLimit,
-    windowSeconds: AI_CONFIG.dailyIpWindowSeconds,
+    key: getRateLimitKey(request, options.namespace),
+    limit: options.limit,
+    windowSeconds: options.windowSeconds,
   });
 
   return {
     allowed: reservation.allowed,
-    remaining: Math.max(0, AI_CONFIG.dailyIpLimit - reservation.count),
+    remaining: Math.max(0, options.limit - reservation.count),
     retryAfterSeconds: Math.max(
       1,
       Math.ceil((reservation.resetAt - Date.now()) / 1000),
     ),
     release: reservation.release,
   };
+}
+
+export async function reserveAiQuestion(
+  request: Request,
+  store: DailyRateLimitStore = getDailyRateLimitStore(),
+): Promise<RateLimitReservation> {
+  return reserveAiOperation(
+    request,
+    {
+      namespace: "daily",
+      limit: AI_CONFIG.dailyIpLimit,
+      windowSeconds: AI_CONFIG.dailyIpWindowSeconds,
+    },
+    store,
+  );
 }

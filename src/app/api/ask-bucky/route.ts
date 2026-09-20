@@ -1,6 +1,11 @@
 import { after } from "next/server";
 
 import { AI_CONFIG, DAILY_LIMIT_MESSAGE } from "@/config/ai";
+import type { TemporaryDocument } from "@/lib/files/types";
+import {
+  DocumentInputError,
+  validateTemporaryDocument,
+} from "@/lib/files/validate-file";
 import {
   reserveAiQuestion,
   type RateLimitReservation,
@@ -34,6 +39,7 @@ export async function POST(request: Request): Promise<Response> {
     typeof body === "object" && body !== null && "question" in body
       ? (body as { question?: unknown }).question
       : undefined;
+  let temporaryDocument: TemporaryDocument | undefined;
 
   if (typeof question !== "string") {
     return json({ error: "Please provide a question." }, { status: 400 });
@@ -54,6 +60,27 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "temporaryDocument" in body &&
+    (body as { temporaryDocument?: unknown }).temporaryDocument !== undefined
+  ) {
+    try {
+      temporaryDocument = validateTemporaryDocument(
+        (body as { temporaryDocument: unknown }).temporaryDocument,
+      );
+    } catch (error) {
+      if (error instanceof DocumentInputError) {
+        return json(
+          { error: error.message, code: error.code },
+          { status: error.status },
+        );
+      }
+      return json({ error: "The temporary document is invalid." }, { status: 400 });
+    }
+  }
+
   let reservation: RateLimitReservation | undefined;
 
   try {
@@ -69,7 +96,9 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    const result = await answerQuestion(normalizedQuestion);
+    const result = temporaryDocument
+      ? await answerQuestion(normalizedQuestion, { temporaryDocument })
+      : await answerQuestion(normalizedQuestion);
 
     if (result.status === "rejected") {
       await reservation.release();
@@ -100,7 +129,14 @@ export async function POST(request: Request): Promise<Response> {
       remainingDaily,
       sources: result.sources.map((source) => ({
         id: source.id,
-        title: source.metadata.title,
+        title:
+          source.metadata.sourceType === "uploaded-document"
+            ? `Uploaded Document: ${source.metadata.fileName}`
+            : `Bucky Profile: ${source.metadata.title}`,
+        type:
+          source.metadata.sourceType === "uploaded-document"
+            ? "uploaded-document"
+            : "bucky-profile",
         score: Number(source.score.toFixed(4)),
       })),
     });

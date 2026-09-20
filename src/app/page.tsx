@@ -28,7 +28,7 @@ const projectFocus = [
   "Realtime AI UI",
   "Prompt Intelligence",
   "Competitor Analysis",
-  "Agent Actions",
+  "Generated Recommendations",
   "Analytics",
   "Growth",
 ];
@@ -44,6 +44,55 @@ const ragStages = [
 ];
 
 const ragEvaluation = ["Precision@K", "Recall@K", "Faithfulness", "Answer Relevance"];
+
+const agentEngineeringDetails = [
+  {
+    label: "Orchestration",
+    value: "Planner-led multi-agent workflow with explicit specialist handoffs.",
+  },
+  {
+    label: "System contracts",
+    value: "Tool-connected research and structured outputs keep each stage reviewable.",
+  },
+  {
+    label: "Observability",
+    value: "Tracing exposes how evidence moves from research into interview strategy.",
+  },
+  {
+    label: "Quality control",
+    value: "Evidence evaluation and human review protect the final interview plan.",
+  },
+];
+
+const ragBuildDetails = [
+  {
+    label: "Ingestion",
+    value: "Document chunking with configurable chunk size, overlap, and metadata filtering.",
+  },
+  {
+    label: "Retrieval",
+    value: "Embeddings, cosine similarity, Top-K selection, and a configurable similarity threshold.",
+  },
+  {
+    label: "Context",
+    value: "Context construction from the strongest retrieved evidence before generation.",
+  },
+  {
+    label: "Generation",
+    value: "Grounded answer generation constrained to the selected profile context.",
+  },
+  {
+    label: "Evaluation",
+    value: "Precision@K, Recall@K, Faithfulness, and Answer Relevance checks.",
+  },
+];
+
+const ragFailureSignals = [
+  ["Low Precision", "Retrieval contains too much noise."],
+  ["Low Recall", "Relevant evidence is being missed."],
+  ["Good retrieval + low Faithfulness", "Generation is producing unsupported claims."],
+  ["Low Answer Relevance", "The answer is not directly addressing the user's question."],
+];
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -61,7 +110,7 @@ const structuredData = {
       url: "https://buckyqian.com/",
       name: "Bucky Qian | Applied AI Engineer",
       description:
-        "Applied AI Engineer building AI agents, RAG systems, evaluation pipelines, and production AI interfaces.",
+        "Applied AI Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.",
       dateModified: "2026-09-20",
       isPartOf: { "@id": "https://buckyqian.com/#website" },
       mainEntity: { "@id": "https://buckyqian.com/#person" },
@@ -76,7 +125,7 @@ const structuredData = {
       url: "https://buckyqian.com/",
       jobTitle: "Applied AI Engineer",
       description:
-        "Applied AI Engineer building AI agents, RAG systems, evaluation pipelines, and production AI interfaces.",
+        "Applied AI Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.",
       email: "mailto:BuckQianWorking@gmail.com",
       address: {
         "@type": "PostalAddress",
@@ -424,9 +473,17 @@ export default function Home() {
           <div className="hero-lower">
             <p>AI systems with frontend product instinct.</p>
             <div className="hero-actions">
-              <a href="#work">View selected work <ArrowDown size={16} /></a>
-              <button onClick={() => setAskBuckyOpen(true)} type="button">
-                Ask Bucky AI <Sparkles size={15} />
+              <a className="hero-action hero-action-work" href="#work">
+                View selected work <ArrowDown aria-hidden="true" size={16} />
+              </a>
+              <button
+                aria-controls="ask-bucky-drawer"
+                aria-expanded={askBuckyOpen}
+                className="hero-action hero-action-ai"
+                onClick={() => setAskBuckyOpen(true)}
+                type="button"
+              >
+                Ask Bucky AI <Sparkles aria-hidden="true" size={15} />
               </button>
             </div>
           </div>
@@ -528,9 +585,9 @@ export default function Home() {
 
             <div className="topify-detail">
               <ProjectReveal className="topify-detail-copy">
-                <p className="project-view-label">02 / Realtime + agent detail</p>
+                <p className="project-view-label">02 / Realtime + recommendation detail</p>
                 <h4>Making AI latency visible and usable.</h4>
-                <p>Progressive states make analysis legible while reviewable agent actions turn signals into a clear next step.</p>
+                <p>Progressive states make analysis legible while reviewable AI-generated recommendations turn signals into a clear next step.</p>
                 <div className="topify-detail-meta"><span>SSE / Progressive state</span><span>Human review</span></div>
               </ProjectReveal>
               <div className="topify-detail-media">
@@ -539,8 +596,8 @@ export default function Home() {
                   alt="Topify realtime AI analysis interface showing planning, running, and progressive execution states."
                   width={1616}
                   height={1560}
-                  label="Realtime system / Agent detail"
-                  caption="Analysis progress / Reviewable action"
+                  label="Realtime system / Recommendations"
+                  caption="Analysis progress / Reviewable recommendation"
                   index="02"
                 />
               </div>
@@ -587,6 +644,25 @@ export default function Home() {
                 <span>Tools</span><span>Structured output</span><span>Tracing</span><span>Evaluation</span>
               </div>
             </ProjectReveal>
+            <ProjectReveal className="engineering-details agent-engineering-details">
+              <header className="engineering-details-header">
+                <p className="project-view-label">Implementation / 02.2A</p>
+                <h4>Engineering Details</h4>
+              </header>
+              <dl className="engineering-detail-grid">
+                {agentEngineeringDetails.map((detail, index) => (
+                  <div key={detail.label}>
+                    <dt><span>{String(index + 1).padStart(2, "0")}</span>{detail.label}</dt>
+                    <dd>{detail.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="project-actions" aria-label="AI Job Intelligence Agent actions">
+                <a className="project-action" href="/projects/ai-job-intelligence">
+                  View case study <ArrowUpRight aria-hidden="true" />
+                </a>
+              </div>
+            </ProjectReveal>
           </article>
 
           <article className="work-project rag-project" aria-labelledby="rag-title">
@@ -612,6 +688,79 @@ export default function Home() {
             <ProjectReveal className="rag-evaluation" aria-label="RAG evaluation concepts">
               <span>Evaluation</span>
               {ragEvaluation.map((item) => <strong key={item}>{item}</strong>)}
+            </ProjectReveal>
+            <ProjectReveal className="engineering-details rag-engineering-details">
+              <header className="engineering-details-header">
+                <p className="project-view-label">Implementation / 02.3A</p>
+                <h4>Engineering Details</h4>
+              </header>
+
+              <section className="engineering-subsection" aria-labelledby="rag-built-title">
+                <h5 id="rag-built-title"><span>A</span> What I Built</h5>
+                <dl className="engineering-detail-grid rag-build-grid">
+                  {ragBuildDetails.map((detail, index) => (
+                    <div key={detail.label}>
+                      <dt><span>{String(index + 1).padStart(2, "0")}</span>{detail.label}</dt>
+                      <dd>{detail.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+
+              <section className="engineering-subsection" aria-labelledby="rag-evaluation-title">
+                <h5 id="rag-evaluation-title"><span>B</span> How I Evaluate It</h5>
+                <div className="rag-quality-groups">
+                  <div>
+                    <p>Retrieval Quality</p>
+                    <strong>Precision@K</strong>
+                    <strong>Recall@K</strong>
+                  </div>
+                  <div>
+                    <p>Answer Quality</p>
+                    <strong>Faithfulness</strong>
+                    <strong>Answer Relevance</strong>
+                  </div>
+                </div>
+                <dl className="rag-failure-signals">
+                  {ragFailureSignals.map(([signal, meaning]) => (
+                    <div key={signal}>
+                      <dt>{signal}</dt>
+                      <dd>{meaning}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+
+              <section className="engineering-subsection" aria-labelledby="rag-diagnosis-title">
+                <h5 id="rag-diagnosis-title"><span>C</span> Failure Diagnosis</h5>
+                <div className="diagnosis-flow" aria-label="RAG failure diagnosis flow">
+                  <ol>
+                    <li>Bad answer</li>
+                    <li>Check retrieval</li>
+                    <li>Precision / Recall</li>
+                    <li>Retrieval good?</li>
+                  </ol>
+                  <div className="diagnosis-branches">
+                    <div><span>No</span><strong>Fix retrieval</strong></div>
+                    <div><span>Yes</span><strong>Check Faithfulness / Relevance</strong><strong>Fix generation</strong></div>
+                  </div>
+                </div>
+              </section>
+
+              <div className="project-actions" aria-label="RAG and Evaluation System actions">
+                <a className="project-action" href="/projects/mini-rag">
+                  View case study <ArrowUpRight aria-hidden="true" />
+                </a>
+                <button
+                  aria-controls="ask-bucky-drawer"
+                  aria-expanded={askBuckyOpen}
+                  className="project-action"
+                  onClick={() => setAskBuckyOpen(true)}
+                  type="button"
+                >
+                  Try Ask Bucky AI <Sparkles aria-hidden="true" />
+                </button>
+              </div>
             </ProjectReveal>
           </article>
         </div>
@@ -642,6 +791,7 @@ export default function Home() {
             <a href="https://www.linkedin.com/in/hao-q-156421170/" target="_blank" rel="noreferrer">LinkedIn</a>
             <a href="/Bucky-Qian-Resume.pdf" download>Resume</a>
           </nav>
+          <p className="resume-context">Resume + selected AI projects</p>
           <a className="contact-email" href="mailto:BuckQianWorking@gmail.com">
             Start a conversation <ArrowUpRight />
           </a>

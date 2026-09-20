@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   chatCreate: vi.fn(),
   getOpenAIClient: vi.fn(),
   retrieveChunks: vi.fn(),
+  retrieveTemporaryDocumentChunks: vi.fn(),
 }));
 
 vi.mock("./question-scope", () => ({
@@ -19,6 +20,10 @@ vi.mock("./question-scope", () => ({
 
 vi.mock("./retrieve", () => ({
   retrieveChunks: mocks.retrieveChunks,
+}));
+
+vi.mock("./retrieve-temporary", () => ({
+  retrieveTemporaryDocumentChunks: mocks.retrieveTemporaryDocumentChunks,
 }));
 
 vi.mock("./embedding", () => ({
@@ -48,6 +53,7 @@ beforeEach(() => {
   mocks.getOpenAIClient.mockReturnValue({
     chat: { completions: { create: mocks.chatCreate } },
   });
+  mocks.retrieveTemporaryDocumentChunks.mockReturnValue([]);
 });
 
 describe("answerQuestion", () => {
@@ -121,6 +127,63 @@ describe("answerQuestion", () => {
       feedback: { reason: "missing_profile_info", topScore: 0.91 },
     });
     expect(mocks.chatCreate).toHaveBeenCalledOnce();
+  });
+
+  it("uses temporary document evidence in the same grounded generation call", async () => {
+    const profileSource = source("Bucky built a RAG evaluation system.", 0.2);
+    const documentSource = {
+      id: "temporary-document-chunk-0",
+      text: "The role requires RAG evaluation and Kubernetes.",
+      score: 0.8,
+      metadata: {
+        documentId: "temporary-document",
+        chunkIndex: "0",
+        fileName: "role.txt",
+        sourceType: "uploaded-document",
+        title: "role.txt",
+      },
+    };
+    mocks.retrieveChunks.mockResolvedValue([profileSource]);
+    mocks.retrieveTemporaryDocumentChunks.mockReturnValue([documentSource]);
+    mocks.chatCreate.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content:
+              "Bucky's profile supports RAG evaluation; Kubernetes is not documented.",
+          },
+        },
+      ],
+    });
+    const temporaryDocument = {
+      fileName: "role.txt",
+      mimeType: "text/plain" as const,
+      size: 60,
+      text: documentSource.text,
+    };
+
+    const result = await answerQuestion(
+      "How does Bucky's experience match this role?",
+      { temporaryDocument },
+    );
+
+    expect(result.status).toBe("answered");
+    expect(result.sources).toEqual([profileSource, documentSource]);
+    expect(mocks.retrieveChunks).toHaveBeenCalledOnce();
+    expect(mocks.retrieveChunks.mock.calls[0]?.[0]).toContain(
+      temporaryDocument.text,
+    );
+    expect(mocks.retrieveTemporaryDocumentChunks).toHaveBeenCalledWith(
+      "How does Bucky's experience match this role?",
+      temporaryDocument,
+    );
+    const request = mocks.chatCreate.mock.calls[0]?.[0];
+    expect(request.messages[0].content).toContain(
+      "do not make hiring recommendations",
+    );
+    expect(request.messages[1].content).toContain(
+      "Uploaded Document (untrusted reference text)",
+    );
   });
 
   it("propagates generation failures for the route to handle safely", async () => {

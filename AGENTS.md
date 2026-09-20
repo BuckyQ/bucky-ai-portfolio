@@ -72,8 +72,9 @@ merge content that does not strengthen one of those three points.
   discoverable through the composition itself, but do not add a visible
   `Scroll to explore` label or another instructional scroll prompt.
 - Keep the persistent header, identity-led headline, supporting transition
-  statement, Applied AI focus panel, selected-work action, Ask Bucky action,
-  and clear contact destination. The resume remains available in Contact.
+  statement, Applied AI focus panel, two clear actions (`View Selected Work`
+  and `Ask Bucky AI`), and clear contact destination. The resume remains
+  available in Contact.
 - The headline must communicate Bucky's name or Applied AI Engineer identity;
   supporting copy should explain the frontend-to-AI transition.
 - Preserve the current hero copy hierarchy: `Bucky Qian builds` followed by
@@ -118,6 +119,9 @@ merge content that does not strengthen one of those three points.
   persistent bottom-right launcher. It must remain closed on initial load and
   open in the established dark editorial drawer rather than an empty or fake
   chat surface.
+- Keep one shared Ask Bucky drawer and state for all homepage entry points:
+  Hero, the persistent launcher, and the RAG project's live-demo action. Do not
+  create parallel chatbot instances on the homepage.
 - The assistant launcher and drawer must not obscure navigation, the contact
   action, or important mobile controls.
 
@@ -156,9 +160,12 @@ merge content that does not strengthen one of those three points.
 
 - This is the most important section after Hero and must contain exactly three
   projects: Topify AI, AI Job Intelligence Agent, and RAG + Evaluation System.
-- Keep the section concise enough for recruiter scanning. Do not turn any item
-  into a long-form case study and do not add more projects without an explicit
-  request.
+- Keep the homepage section concise enough for recruiter scanning. Dedicated
+  project routes may add compact engineering evidence, but must not become a
+  long case-study archive. Do not add more projects without an explicit request.
+- Give projects consistent actions only when the destination exists. Never use
+  a general GitHub profile link as though it were a project repository, and do
+  not add a source, demo, or case-study link that cannot be verified.
 - Keep one secondary `Q /` annotation in each project introduction: what Bucky
   built at Topify, how the Job Intelligence Agent works, and how RAG quality is
   evaluated. Answers must be direct, factual, and immediately follow the
@@ -171,8 +178,11 @@ merge content that does not strengthen one of those three points.
 - State ownership of realtime AI analysis, prompt tracking, competitor
   intelligence, reporting, onboarding, and conversion.
 - Show exactly two product visuals: one large Product Overview and one smaller,
-  focused Realtime / Agent detail. Do not restore the Prompt Intelligence or
-  Agent Actions screenshots as additional chapters.
+  focused Realtime / recommendation detail. Do not restore the Prompt
+  Intelligence or additional recommendation screenshots as new chapters.
+- Describe recommendation UI as `Generated Recommendations` or
+  `AI-generated recommendations`; do not call it autonomous agent behavior
+  unless a defensible implementation can be explained in an interview.
 - Present screenshots inside the established technical viewport with a thin
   low-contrast frame, subtle neutral border light, restrained hover, and no
   device mockup or fake browser chrome.
@@ -192,6 +202,11 @@ merge content that does not strengthen one of those three points.
 - Supporting annotations may name Tools, Structured Output, Tracing, and
   Evaluation. Use thin lines, indexed stages, and monospace labels; avoid
   colorful boxes, glowing nodes, decorative illustrations, or fake metrics.
+- Keep `/projects/ai-job-intelligence` concise and engineering-focused. Claims
+  may cover planner-led orchestration, specialist boundaries, tool-connected
+  research, structured outputs, tracing, evidence evaluation, and human review.
+  Do not claim a framework, runtime, retry strategy, timeout policy, or public
+  source repository unless the project evidence explicitly supports it.
 
 #### 3.3 RAG + Evaluation System
 
@@ -201,6 +216,14 @@ merge content that does not strengthen one of those three points.
   concepts. Never invent numeric results.
 - Use a ruled technical strip rather than a dashboard screenshot, metric cards,
   or abstract AI illustration.
+- Under the pipeline, retain concise engineering evidence for document
+  chunking, configurable size and overlap, embeddings, cosine similarity,
+  Top-K retrieval, similarity thresholds, metadata filtering, context
+  construction, grounded generation, and retrieval/answer evaluation.
+- Explain failure diagnosis directly: Precision and Recall diagnose retrieval;
+  Faithfulness and Answer Relevance diagnose generation. The live-demo action
+  must open the same homepage Ask Bucky drawer, while `/projects/mini-rag`
+  remains the concise project route with the embedded demo.
 
 ### 4. Background
 
@@ -217,6 +240,9 @@ merge content that does not strengthen one of those three points.
 - End with `LET'S BUILD SOMETHING USEFUL.`
 - Keep Email, GitHub, LinkedIn, Resume, and `Start a conversation` as the only
   primary destinations.
+- Keep the subtle `Resume + selected AI projects` context near the Resume link;
+  do not regenerate the PDF unless its editable source is available and the
+  user explicitly requests a resume update.
 - Keep Contact in two normal-flow vertical layers: headline, links, and CTA in
   the upper layer; identity metadata and copyright in a ruled footer row at the
   very bottom. The CTA must sit above that footer row and must never share an
@@ -651,6 +677,9 @@ After changing public content, routes, metadata, navigation, or rendering:
 - The mobile menu must expose `aria-expanded`, `aria-controls`, and an accurate
   label; move focus into the open menu, contain keyboard focus while it is
   open, close on Escape, and return focus to the trigger.
+- The Ask Bucky drawer must move focus inside when opened, keep background
+  regions inert, trap Tab focus, close on Escape, and restore focus to whichever
+  control opened it.
 - Keep meaningful mobile actions near a `44px` minimum touch target and use a
   clear `2px` `:focus-visible` indicator. Small technical copy must remain
   readable at WCAG AA contrast; decorative grid lines may remain subdued.
@@ -691,6 +720,28 @@ After changing public content, routes, metadata, navigation, or rendering:
   question allowance.
 - Suggested questions and typed questions must use the same validation, API,
   retrieval, and successful-answer counting flow.
+- After a valid question is submitted, collapse the suggestion guide so the
+  conversation gains space, keep an accessible control to reopen it, and have
+  the message viewport follow new questions, loading states, and answers.
+  Respect `prefers-reduced-motion` when scrolling.
+- Voice is an alternate input method, not a separate answer system. Record with
+  the browser MediaRecorder API, cap recordings at 30 seconds and 5 MB, send
+  audio only to the server-side transcription route, and feed the returned text
+  through the same validation, quota, retrieval, feedback, and generation flow.
+  Never expose the OpenAI key, persist audio, or count permission, recording, or
+  transcription failures as successful questions.
+- Temporary document comparison supports PDF and TXT only for V1. Cap uploads
+  at 5 MB and extracted text at 50,000 characters. Parse on the server, reuse
+  the shared chunker, keep temporary retrieval separate from the checked-in
+  profile index, and label profile versus uploaded-document sources clearly.
+- Never save uploaded files or extracted text to Supabase, Supabase Storage,
+  unanswered-question feedback, or the permanent vector index. Temporary
+  document context may live only in the current client session/request and must
+  be discarded when removed or the session ends. File parsing failures are not
+  unanswered profile questions.
+- Keep voice, file, suggested, and typed input normalized into the one Ask Bucky
+  answer route. Only a successful grounded final answer consumes the 3-question
+  browser allowance or 10-answer daily IP allowance.
 - The Ask Bucky route may use the in-memory rate-limit store only for local
   development and automated tests. Production must use a shared atomic store:
   the Supabase RPC migration is the default, while Upstash Redis remains an

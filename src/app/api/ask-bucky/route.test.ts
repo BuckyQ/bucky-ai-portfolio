@@ -95,6 +95,24 @@ describe("POST /api/ask-bucky input validation", () => {
     expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
     expect(mocks.answerQuestion).not.toHaveBeenCalled();
   });
+
+  it("rejects an invalid temporary document before reserving quota", async () => {
+    const response = await POST(
+      makeRequest({
+        question: "How does Bucky match this role?",
+        temporaryDocument: {
+          fileName: "role.exe",
+          mimeType: "application/octet-stream",
+          size: 20,
+          text: "Role requirements",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(415);
+    expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
+    expect(mocks.answerQuestion).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/ask-bucky request flow", () => {
@@ -137,6 +155,69 @@ describe("POST /api/ask-bucky request flow", () => {
     expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
   });
 
+  it("passes temporary document context through the same answer pipeline", async () => {
+    const reservation = makeReservation({ remaining: 8 });
+    const temporaryDocument = {
+      fileName: "job-description.txt",
+      mimeType: "text/plain",
+      size: 80,
+      text: "The role requires RAG evaluation and Kubernetes.",
+    };
+    mocks.reserveAiQuestion.mockResolvedValue(reservation);
+    mocks.answerQuestion.mockResolvedValue({
+      status: "answered",
+      answer: "Bucky's profile supports RAG evaluation; Kubernetes is not documented.",
+      sources: [
+        {
+          id: "projects-chunk-0",
+          text: "Bucky evaluates RAG systems.",
+          score: 0.88,
+          metadata: {
+            documentId: "projects",
+            chunkIndex: "0",
+            title: "Mini RAG Project",
+          },
+        },
+        {
+          id: "temporary-document-chunk-0",
+          text: temporaryDocument.text,
+          score: 0.7,
+          metadata: {
+            documentId: "temporary-document",
+            chunkIndex: "0",
+            title: temporaryDocument.fileName,
+            fileName: temporaryDocument.fileName,
+            sourceType: "uploaded-document",
+          },
+        },
+      ],
+    });
+
+    const response = await POST(
+      makeRequest({
+        question: "How does Bucky match this role?",
+        temporaryDocument,
+      }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(mocks.answerQuestion).toHaveBeenCalledWith(
+      "How does Bucky match this role?",
+      { temporaryDocument },
+    );
+    expect(payload.sources).toEqual([
+      expect.objectContaining({
+        title: "Bucky Profile: Mini RAG Project",
+        type: "bucky-profile",
+      }),
+      expect.objectContaining({
+        title: "Uploaded Document: job-description.txt",
+        type: "uploaded-document",
+      }),
+    ]);
+  });
+
   it("returns HTTP 429 before RAG work when the daily limit is full", async () => {
     mocks.reserveAiQuestion.mockResolvedValue(
       makeReservation({ allowed: false, remaining: 0, retryAfterSeconds: 120 }),
@@ -177,6 +258,41 @@ describe("POST /api/ask-bucky request flow", () => {
         topScore: undefined,
       });
     });
+  });
+
+  it("never includes temporary document text in unanswered-question logging", async () => {
+    const reservation = makeReservation();
+    mocks.reserveAiQuestion.mockResolvedValue(reservation);
+    mocks.answerQuestion.mockResolvedValue({
+      status: "rejected",
+      code: "INSUFFICIENT_CONTEXT",
+      answer: "No matching public profile information was found.",
+      sources: [],
+      feedback: { reason: "missing_profile_info" },
+    });
+
+    await POST(
+      makeRequest({
+        question: "Does Bucky have Kubernetes experience?",
+        temporaryDocument: {
+          fileName: "private-role.txt",
+          mimeType: "text/plain",
+          size: 56,
+          text: "CONFIDENTIAL ROLE CONTENT THAT MUST NEVER BE SAVED",
+        },
+      }),
+    );
+
+    await vi.waitFor(() => {
+      expect(mocks.safelySaveUnansweredQuestion).toHaveBeenCalledWith({
+        question: "Does Bucky have Kubernetes experience?",
+        reason: "missing_profile_info",
+        topScore: undefined,
+      });
+    });
+    expect(
+      JSON.stringify(mocks.safelySaveUnansweredQuestion.mock.calls),
+    ).not.toContain("CONFIDENTIAL ROLE CONTENT");
   });
 
   it("releases quota and records the top score for low similarity", async () => {

@@ -12,10 +12,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://buckyqian.com/";
+const siteUrl = "https://buckyqian.com";
 const siteTitle = "Bucky Qian | Applied AI Engineer";
 const siteDescription =
-  "Bucky Qian is an Applied AI Engineer with 4+ years across Apple and Topify AI, building AI agents, RAG systems, LLM applications, and production interfaces.";
+  "Applied AI Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -24,16 +24,32 @@ export const metadata: Metadata = {
   applicationName: "Bucky Qian",
   authors: [{ name: "Bucky Qian" }],
   creator: "Bucky Qian",
+  alternates: {
+    canonical: siteUrl,
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
   openGraph: {
     type: "profile",
+    url: siteUrl,
     title: siteTitle,
     description: siteDescription,
     siteName: "Bucky Qian",
+    images: [
+      {
+        url: "/hero-signal-poster.jpg",
+        width: 1280,
+        height: 720,
+        alt: "Bucky Qian Applied AI Engineer portfolio over a dark cinematic ocean.",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
+    images: ["/hero-signal-poster.jpg"],
   },
   robots: {
     index: true,
@@ -44,10 +60,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <head>
-        <link rel="canonical" href={siteUrl} />
-        <meta property="og:url" content={siteUrl} />
-      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

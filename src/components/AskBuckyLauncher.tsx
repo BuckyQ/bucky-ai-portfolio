@@ -19,7 +19,6 @@ export default function AskBuckyLauncher({
   const [showHint, setShowHint] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let showTimer: number | undefined;
@@ -44,12 +43,20 @@ export default function AskBuckyLauncher({
   useEffect(() => {
     if (!open) return;
 
-    previousFocusRef.current =
+    const focusToRestore =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
     const previousOverflow = document.body.style.overflow;
+    const backgroundRegions = [".site-header", "#main-content", "#contact"]
+      .map((selector) => document.querySelector<HTMLElement>(selector))
+      .filter((region): region is HTMLElement => region !== null);
+    const previousInertStates = backgroundRegions.map((region) => region.inert);
+
     document.body.style.overflow = "hidden";
+    backgroundRegions.forEach((region) => {
+      region.inert = true;
+    });
     window.requestAnimationFrame(() => closeButtonRef.current?.focus());
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -63,7 +70,7 @@ export default function AskBuckyLauncher({
 
       const focusable = Array.from(
         panelRef.current?.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [contenteditable="true"], [tabindex]:not([tabindex="-1"])',
         ) ?? [],
       ).filter((element) => !element.hasAttribute("hidden"));
 
@@ -86,7 +93,12 @@ export default function AskBuckyLauncher({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
-      window.requestAnimationFrame(() => previousFocusRef.current?.focus());
+      backgroundRegions.forEach((region, index) => {
+        region.inert = previousInertStates[index] ?? false;
+      });
+      window.requestAnimationFrame(() => {
+        if (focusToRestore?.isConnected) focusToRestore.focus();
+      });
     };
   }, [onOpenChange, open]);
 
@@ -104,6 +116,7 @@ export default function AskBuckyLauncher({
           </p>
         ) : null}
         <button
+          aria-label="Open Ask Bucky AI assistant"
           aria-controls="ask-bucky-drawer"
           aria-expanded={open}
           className="ask-bucky-launcher-button"
