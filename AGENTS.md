@@ -72,8 +72,8 @@ merge content that does not strengthen one of those three points.
   discoverable through the composition itself, but do not add a visible
   `Scroll to explore` label or another instructional scroll prompt.
 - Keep the persistent header, identity-led headline, supporting transition
-  statement, Applied AI focus panel, selected-work action, resume action, and
-  clear contact destination.
+  statement, Applied AI focus panel, selected-work action, Ask Bucky action,
+  and clear contact destination. The resume remains available in Contact.
 - The headline must communicate Bucky's name or Applied AI Engineer identity;
   supporting copy should explain the frontend-to-AI transition.
 - Preserve the current hero copy hierarchy: `Bucky Qian builds` followed by
@@ -114,11 +114,12 @@ merge content that does not strengthen one of those three points.
 - Honor `prefers-reduced-motion`, pause animation while the document is hidden,
   cap pixel ratio and reflection resolution, and dispose all Three.js geometry,
   materials, textures, render targets, and event listeners during cleanup.
-- Reserve an intentional integration point for a future Mini RAG assistant.
-  The reserved surface may be a launcher position, layout slot, or component
-  boundary, but do not build a fake chatbot or expose an empty chat window.
-- The future assistant must not obscure navigation, the contact action, or
-  important mobile controls.
+- Keep the real Mini RAG assistant discoverable through the Hero action and a
+  persistent bottom-right launcher. It must remain closed on initial load and
+  open in the established dark editorial drawer rather than an empty or fake
+  chat surface.
+- The assistant launcher and drawer must not obscure navigation, the contact
+  action, or important mobile controls.
 
 ### 2. Profile And Experience
 
@@ -673,6 +674,44 @@ After changing public content, routes, metadata, navigation, or rendering:
 - Never commit secrets, API keys, tokens, `.env` values, build output, or
   dependency directories.
 
+### MiniRAG Data Workflow
+
+- Treat `src/data/profile/bucky-profile.md` as the comprehensive public profile.
+  The other Markdown files in that directory are supplemental sources.
+- `src/data/profile/bucky-profile-index.json` is generated data. Never edit it
+  manually.
+- After changing any profile Markdown, run `npm run rag:index` and commit the
+  refreshed JSON index with the source change.
+- `npm run build` validates that the local index matches the Markdown sources
+  without making an embeddings API request.
+- Runtime retrieval reads the checked-in JSON index and embeds only the user's
+  query. It must not regenerate document embeddings during a request.
+- Keep AI limits, validation, retrieval thresholds, and model defaults in
+  `src/config/ai.ts`. A rejected or failed request must not consume a successful
+  question allowance.
+- Suggested questions and typed questions must use the same validation, API,
+  retrieval, and successful-answer counting flow.
+- The Ask Bucky route may use the in-memory rate-limit store only for local
+  development and automated tests. Production must use a shared atomic store:
+  the Supabase RPC migration is the default, while Upstash Redis remains an
+  optional backend through `UPSTASH_REDIS_REST_URL` and
+  `UPSTASH_REDIS_REST_TOKEN`. Never expose any of these values to client code.
+- Reserve a daily quota slot before an expensive AI request, then release it
+  for rejected or failed requests. Keep reservation and release atomic so
+  concurrent Vercel instances cannot all consume the final slot.
+- Unanswered-question feedback is written only from the server to Supabase.
+  Use `SUPABASE_URL` and `SUPABASE_SECRET_KEY`; keep both server-only, never
+  store raw IP addresses or chat history, and exclude malformed, unrelated,
+  spam-like, or sensitive inputs.
+- Store only reasonable professional questions that fail with `no_results`,
+  `low_similarity`, or `missing_profile_info`. Feedback writes must never block
+  the user response.
+- Feedback records are a human review queue only. Never add user questions or
+  answers directly to the public profile or generated RAG index.
+- Keep `/privacy` accurate whenever Ask Bucky data collection, subprocessors,
+  retention, or contact handling changes.
+- Keep API keys and other MiniRAG secrets only in ignored `.env.local` files.
+
 ## Change Workflow
 
 Before editing:
@@ -694,11 +733,13 @@ Before considering work complete:
 
 1. Run `npm run build` and fix compilation and TypeScript errors.
 2. Run `npm run lint` when application code changes.
-3. For visual changes, inspect desktop and mobile for overlap, clipping, blank
+3. Run `npm run test` after changing Ask Bucky, RAG, feedback logging, or rate
+   limiting. Run `npm run test:concurrency` after changing quota semantics.
+4. For visual changes, inspect desktop and mobile for overlap, clipping, blank
    states, and unreadable contrast.
-4. Exercise modified navigation, download, email, and external links.
-5. Run the relevant SEO/GEO validation steps for public-content changes.
-6. Summarize changes and report any check that could not be completed.
+5. Exercise modified navigation, download, email, and external links.
+6. Run the relevant SEO/GEO validation steps for public-content changes.
+7. Summarize changes and report any check that could not be completed.
 
 ## Definition Of Done
 

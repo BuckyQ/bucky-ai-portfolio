@@ -4,27 +4,42 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run rag:check && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:concurrency": "tsx scripts/concurrency-test.ts",
+    "rag:index": "tsx scripts/build-profile-index.ts",
+    "rag:check": "tsx scripts/build-profile-index.ts --check"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
+    "openai": "^7.15.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "three": "^0.186.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "jsdom": "^27.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.13",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.11"
   }
 }

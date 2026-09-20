@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, ArrowUpRight, Download, Menu, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Menu, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import ElectronicOcean from "./components/ElectronicOcean";
+import AskBuckyLauncher from "@/components/AskBuckyLauncher";
+import ElectronicOcean from "@/components/ElectronicOcean";
 
 const signalBars = [31, 44, 38, 62, 48, 72, 54, 81, 67, 92, 58, 76, 45, 69, 52, 86, 63, 96, 74, 88, 66, 78, 59, 70];
 
@@ -61,7 +62,7 @@ const structuredData = {
       name: "Bucky Qian | Applied AI Engineer",
       description:
         "Applied AI Engineer building AI agents, RAG systems, evaluation pipelines, and production AI interfaces.",
-      dateModified: "2026-09-19",
+      dateModified: "2026-09-20",
       isPartOf: { "@id": "https://buckyqian.com/#website" },
       mainEntity: { "@id": "https://buckyqian.com/#person" },
       about: { "@id": "https://buckyqian.com/#person" },
@@ -269,6 +270,7 @@ function RagAmbient() {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [askBuckyOpen, setAskBuckyOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -423,11 +425,12 @@ export default function Home() {
             <p>AI systems with frontend product instinct.</p>
             <div className="hero-actions">
               <a href="#work">View selected work <ArrowDown size={16} /></a>
-              <a href="/Bucky-Qian-Resume.pdf" download>Download resume <Download size={15} /></a>
+              <button onClick={() => setAskBuckyOpen(true)} type="button">
+                Ask Bucky AI <Sparkles size={15} />
+              </button>
             </div>
           </div>
         </motion.div>
-        <div id="mini-rag-root" data-integration="mini-rag-reserved" aria-hidden="true" />
       </section>
 
       <section className="profile" id="about" aria-labelledby="profile-title">
@@ -646,11 +649,12 @@ export default function Home() {
         <div className="footer-meta">
           <p>
             Bucky Qian · Applied AI Engineer<br />Mountain View, California
-            <time className="footer-freshness" dateTime="2026-09-19">Last updated / Sep 2026</time>
+            <time className="footer-freshness" dateTime="2026-09-20">Last updated / Sep 2026</time>
           </p>
           <span>© 2026 Bucky Qian</span>
         </div>
       </footer>
+      <AskBuckyLauncher open={askBuckyOpen} onOpenChange={setAskBuckyOpen} />
     </>
   );
 }
