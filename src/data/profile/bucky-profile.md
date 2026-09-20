@@ -19,6 +19,18 @@ Bucky is targeting roles such as:
 
 His current focus is on the application layer of AI systems rather than model training or ML research.
 
+## Signature Project and Strongest Skills
+
+Bucky considers Topify AI the project he is most proud of. He found the work especially engaging and values that it produced positive results for the product and business.
+
+His most-used and most-confident skills across recent projects are:
+
+- TypeScript
+- React and Next.js
+- AI product UX
+- Retrieval-Augmented Generation (RAG)
+- AI agents
+
 ## AI Engineering Skills
 
 Bucky has hands-on experience with:
@@ -228,6 +240,10 @@ Bucky holds:
 - Bachelor of Computer Science - University of California, Santa Cruz
 - Associate Degree in Mathematics and Computer Science - College of San Mateo
 
+## Professional Certifications
+
+Bucky's public profile does not list any separate professional certifications. His academic degrees are education credentials rather than professional certifications and are listed in the Education section.
+
 ## Public Contact
 
 - Email: BuckQianWorking@gmail.com
@@ -253,4 +269,3 @@ If information is not present in this public profile, the assistant should respo
 "I don't have that information in Bucky's public profile."
 
 The assistant should not invent details or infer private information.
-
