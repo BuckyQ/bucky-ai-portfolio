@@ -372,8 +372,9 @@ one-off font sizes, font families, or colors.
   - Lead copy: `20-24px` desktop, `18-20px` mobile.
   - Body copy: `16-18px` desktop, `15-17px` mobile.
   - Supporting text: `13-14px` desktop, `12-14px` mobile.
-  - Navigation and labels: `10-12px` desktop, `10-11px` mobile, Geist
-    Mono, weight `500`.
+  - Navigation and labels: `10-12px` desktop, `12-13px` mobile, Geist
+    Mono, weight `500`. Meaningful mobile text must never render below `12px`;
+    interactive mobile text should use at least `13px`.
   - Header navigation is the approved exception: `14px` desktop, `13px`
     tablet, and `20px` inside the mobile menu. The mobile `MENU/CLOSE` trigger
     is `13px`, and the mobile contact action is `16px`.
@@ -682,7 +683,10 @@ After changing public content, routes, metadata, navigation, or rendering:
   control opened it.
 - Keep meaningful mobile actions near a `44px` minimum touch target and use a
   clear `2px` `:focus-visible` indicator. Small technical copy must remain
-  readable at WCAG AA contrast; decorative grid lines may remain subdued.
+  readable at WCAG AA contrast. Meaningful mobile labels and metadata must be
+  at least `12px`, while interactive text should be at least `13px`.
+  Decorative grid lines and nonessential coordinate markers may remain subdued
+  or be hidden on narrow screens.
 - Decorative graphics must be hidden from assistive technology. Meaningful
   content cannot exist only inside a canvas or animation.
 - Preserve `prefers-reduced-motion` support. Accessibility regressions are

@@ -2780,3 +2780,77 @@ footer{padding-bottom:clamp(98px,8vw,112px)}
   .project-action,.project-action svg,.case-intro-actions a,.case-intro-actions svg{transition:none}
   .project-action:hover svg,.project-action:focus-visible svg,.case-intro-actions a:hover svg,.case-intro-actions a:focus-visible svg{transform:none}
 }
+
+/* Mobile readability floor for meaningful labels, metadata, and controls. */
+@media(max-width:767px){
+  .profile-marker{display:none}
+  .hero-status,
+  .portrait-status,
+  .portrait-copy,
+  .section-label,
+  .work-project-header .section-label,
+  .profile-experience-period,
+  .profile-experience-role p,
+  .profile-experience-focus,
+  .profile-system-state,
+  .work-project-focus span,
+  .project-view-label,
+  .topify-overview .project-view-label,
+  .product-viewport-head,
+  .product-viewport-caption,
+  .topify-detail-meta,
+  .diagram-node span,
+  .diagram-node strong,
+  .diagram-branch .diagram-node strong,
+  .diagram-trace span,
+  .rag-project-stage span,
+  .rag-evaluation span,
+  .engineering-detail-grid dt,
+  .rag-quality-groups p,
+  .rag-failure-signals dt,
+  .diagnosis-branches span,
+  .diagnosis-branches strong,
+  .architecture-flow:before,
+  .resume-context,
+  .footer-meta,
+  .footer-freshness,
+  .mini-rag-pipeline span,
+  .mini-rag-footer,
+  .privacy-content section>p,
+  .case-detail-list dt,
+  .case-decision-flow li,
+  .case-agent-flow>li>span,
+  .ask-bucky-drawer-bar,
+  .ask-bucky-header p,
+  .ask-bucky-modes>p,
+  .ask-bucky-upload small,
+  .ask-bucky-file span,
+  .ask-bucky-guide p,
+  .ask-bucky-message>span,
+  .ask-bucky-message small,
+  .ask-bucky-loading,
+  .ask-bucky-input-state,
+  .ask-bucky-form label,
+  .ask-bucky-usage>p,
+  .ask-bucky-launcher-hint{
+    font-size:12px;
+  }
+
+  .profile-system-state{flex-wrap:wrap}
+
+  .hero-actions .hero-action,
+  .geo-proof-link,
+  .project-action,
+  .contact-links a,
+  .case-intro-actions a,
+  .mini-rag-nav,
+  .ask-bucky-launcher-button,
+  .ask-bucky-drawer-bar button,
+  .ask-bucky-drawer .ask-bucky-modes button,
+  .ask-bucky-upload,
+  .ask-bucky-guide-toggle,
+  .ask-bucky-suggestion-list>button,
+  .ask-bucky-limit a{
+    font-size:13px;
+  }
+}
