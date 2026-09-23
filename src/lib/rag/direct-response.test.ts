@@ -27,6 +27,19 @@ describe("getDirectResponse", () => {
   });
 
   it.each([
+    "whats the purpose of this website",
+    "What's this portfolio about?",
+    "What is this site for?",
+    "Why was this website made?",
+    "Tell me about this portfolio.",
+  ])("explains the portfolio purpose for %s", (question) => {
+    expect(getDirectResponse(question)).toMatchObject({
+      kind: "site-purpose",
+      answer: expect.stringContaining("interactive portfolio and resume"),
+    });
+  });
+
+  it.each([
     "Who is Bucky?",
     "What did Bucky work on at Apple?",
     "What is today's weather?",

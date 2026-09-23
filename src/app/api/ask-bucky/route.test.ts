@@ -116,7 +116,12 @@ describe("POST /api/ask-bucky input validation", () => {
 });
 
 describe("POST /api/ask-bucky request flow", () => {
-  it.each(["who r u", "Who are you?", "What can you do?"])(
+  it.each([
+    "who r u",
+    "Who are you?",
+    "What can you do?",
+    "whats the purpose of this website",
+  ])(
     "answers the conversational entry intent without consuming quota: %s",
     async (question) => {
       const response = await POST(makeRequest({ question }));

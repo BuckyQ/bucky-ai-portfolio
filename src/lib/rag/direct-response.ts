@@ -1,4 +1,7 @@
-export type DirectResponseKind = "assistant-introduction" | "capabilities";
+export type DirectResponseKind =
+  | "assistant-introduction"
+  | "capabilities"
+  | "site-purpose";
 
 export interface DirectResponse {
   answer: string;
@@ -22,6 +25,14 @@ const capabilityPatterns = [
 
 const greetingPatterns = [/^(?:hi|hello|hey|yo)(?: there)?$/];
 
+const sitePurposePatterns = [
+  /^(?:what is|whats) (?:the )?purpose of (?:this|the) (?:website|site|portfolio)$/,
+  /^(?:what is|whats) (?:this|the) (?:website|site|portfolio)(?: (?:for|about))?$/,
+  /^what does (?:this|the) (?:website|site|portfolio) (?:do|show)$/,
+  /^why (?:does|is|was) (?:this|the) (?:website|site|portfolio) (?:exist|built|made)$/,
+  /^tell me about (?:this|the) (?:website|site|portfolio)$/,
+];
+
 function normalizeQuestion(question: string): string {
   return question
     .toLowerCase()
@@ -37,6 +48,14 @@ function matchesAny(question: string, patterns: RegExp[]): boolean {
 
 export function getDirectResponse(question: string): DirectResponse | null {
   const normalizedQuestion = normalizeQuestion(question);
+
+  if (matchesAny(normalizedQuestion, sitePurposePatterns)) {
+    return {
+      kind: "site-purpose",
+      answer:
+        "This is Bucky Qian's interactive portfolio and resume. It helps recruiters, hiring managers, and collaborators understand his move from frontend engineering into Applied AI through production work, AI agent projects, RAG and evaluation systems, and clear ways to review his work or contact him.",
+    };
+  }
 
   if (
     matchesAny(normalizedQuestion, assistantIdentityPatterns) ||
