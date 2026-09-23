@@ -40,6 +40,7 @@ interface Message {
 interface AskResponse {
   answer?: string;
   code?: "DAILY_LIMIT" | "INSUFFICIENT_CONTEXT" | "OUT_OF_SCOPE";
+  countsTowardLimit?: boolean;
   error?: string;
   remainingDaily?: number;
   sources?: Source[];
@@ -214,23 +215,25 @@ export default function AskBucky() {
         },
       ]);
 
-      setSuccessfulQuestions((currentCount) => {
-        const nextSuccessfulCount = Math.min(
-          currentCount + 1,
-          AI_CONFIG.sessionQuestionLimit,
-        );
-
-        try {
-          window.sessionStorage.setItem(
-            sessionUsageKey,
-            String(nextSuccessfulCount),
+      if (data.countsTowardLimit !== false) {
+        setSuccessfulQuestions((currentCount) => {
+          const nextSuccessfulCount = Math.min(
+            currentCount + 1,
+            AI_CONFIG.sessionQuestionLimit,
           );
-        } catch {
-          // Keep the in-memory session count when storage is unavailable.
-        }
 
-        return nextSuccessfulCount;
-      });
+          try {
+            window.sessionStorage.setItem(
+              sessionUsageKey,
+              String(nextSuccessfulCount),
+            );
+          } catch {
+            // Keep the in-memory session count when storage is unavailable.
+          }
+
+          return nextSuccessfulCount;
+        });
+      }
     } catch (error) {
       setMessages((current) => [
         ...current,

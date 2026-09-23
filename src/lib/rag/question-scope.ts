@@ -6,6 +6,9 @@ const identityPatterns = [
 ];
 
 const professionalPatterns = [
+  /\bwho(?:'s| is) bucky\b/i,
+  /\b(?:tell me about|introduce) bucky\b/i,
+  /\bwhat does bucky do\b/i,
   /\bexperience\b/i,
   /\bcareer\b/i,
   /\bwork(?:ed|ing)?\b/i,

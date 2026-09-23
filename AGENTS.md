@@ -724,6 +724,11 @@ After changing public content, routes, metadata, navigation, or rendering:
   question allowance.
 - Suggested questions and typed questions must use the same validation, API,
   retrieval, and successful-answer counting flow.
+- Handle brief assistant-introduction, capability, and greeting prompts with a
+  deterministic server response before quota reservation. These responses must
+  not call embeddings or answer generation, consume question limits, or enter
+  unanswered-question feedback. Natural questions about who Bucky is still use
+  the grounded RAG flow.
 - After a valid question is submitted, collapse the suggestion guide so the
   conversation gains space, keep an accessible control to reopen it, and have
   the message viewport follow new questions, loading states, and answers.

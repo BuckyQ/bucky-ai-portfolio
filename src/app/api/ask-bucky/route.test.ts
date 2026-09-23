@@ -116,6 +116,24 @@ describe("POST /api/ask-bucky input validation", () => {
 });
 
 describe("POST /api/ask-bucky request flow", () => {
+  it.each(["who r u", "Who are you?", "What can you do?"])(
+    "answers the conversational entry intent without consuming quota: %s",
+    async (question) => {
+      const response = await POST(makeRequest({ question }));
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload).toMatchObject({
+        answer: expect.stringContaining("Bucky"),
+        countsTowardLimit: false,
+        sources: [],
+      });
+      expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
+      expect(mocks.answerQuestion).not.toHaveBeenCalled();
+      expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
+    },
+  );
+
   it("returns a grounded answer and keeps the successful reservation", async () => {
     const reservation = makeReservation({ remaining: 8 });
     mocks.reserveAiQuestion.mockResolvedValue(reservation);
@@ -144,6 +162,7 @@ describe("POST /api/ask-bucky request flow", () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({
       answer: "Bucky built frontend product experiences at Apple.",
+      countsTowardLimit: true,
       remainingDaily: 8,
     });
     expect(mocks.reserveAiQuestion).toHaveBeenCalledOnce();

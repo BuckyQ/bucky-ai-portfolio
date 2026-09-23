@@ -103,6 +103,27 @@ afterEach(() => {
 });
 
 describe("AskBucky session usage", () => {
+  it("shows a direct assistant introduction without consuming a question", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(200, {
+        answer:
+          "I'm Ask Bucky AI, Bucky Qian's portfolio assistant.",
+        countsTowardLimit: false,
+        sources: [],
+      }),
+    );
+    const { askButton, input, user } = await renderReady();
+
+    await user.type(input, "who r u");
+    await user.click(askButton);
+    await screen.findByText(
+      "I'm Ask Bucky AI, Bucky Qian's portfolio assistant.",
+    );
+
+    expect(screen.getByText("3 questions remaining")).toBeTruthy();
+    expect(window.sessionStorage.getItem("ask-bucky-successful-questions")).toBeNull();
+  });
+
   it("counts only three successful answers and then disables the form", async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(200, { answer: "Grounded answer 1" }))

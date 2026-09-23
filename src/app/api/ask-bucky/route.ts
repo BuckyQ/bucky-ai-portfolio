@@ -10,6 +10,7 @@ import {
   reserveAiQuestion,
   type RateLimitReservation,
 } from "@/lib/rate-limit";
+import { getDirectResponse } from "@/lib/rag/direct-response";
 import { answerQuestion } from "@/lib/rag/generate";
 import { safelySaveUnansweredQuestion } from "@/lib/unanswered-questions";
 
@@ -81,6 +82,16 @@ export async function POST(request: Request): Promise<Response> {
     }
   }
 
+  const directResponse = getDirectResponse(normalizedQuestion);
+
+  if (directResponse) {
+    return json({
+      answer: directResponse.answer,
+      countsTowardLimit: false,
+      sources: [],
+    });
+  }
+
   let reservation: RateLimitReservation | undefined;
 
   try {
@@ -126,6 +137,7 @@ export async function POST(request: Request): Promise<Response> {
 
     return json({
       answer: result.answer,
+      countsTowardLimit: true,
       remainingDaily,
       sources: result.sources.map((source) => ({
         id: source.id,
