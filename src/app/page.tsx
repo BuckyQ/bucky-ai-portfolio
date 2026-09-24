@@ -111,7 +111,7 @@ const structuredData = {
       name: "Bucky Qian | Applied AI Engineer",
       description:
         "Applied AI Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.",
-      dateModified: "2026-09-20",
+      dateModified: "2026-09-24",
       isPartOf: { "@id": "https://buckyqian.com/#website" },
       mainEntity: { "@id": "https://buckyqian.com/#person" },
       about: { "@id": "https://buckyqian.com/#person" },
@@ -799,7 +799,7 @@ export default function Home() {
         <div className="footer-meta">
           <p>
             Bucky Qian · Applied AI Engineer<br />Mountain View, California
-            <time className="footer-freshness" dateTime="2026-09-20">Last updated / Sep 2026</time>
+            <time className="footer-freshness" dateTime="2026-09-24">Last updated / Sep 2026</time>
           </p>
           <span>© 2026 Bucky Qian</span>
         </div>

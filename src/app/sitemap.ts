@@ -4,7 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://buckyqian.com/",
-      lastModified: "2026-09-20",
+      lastModified: "2026-09-24",
       changeFrequency: "monthly",
       priority: 1,
     },
