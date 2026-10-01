@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy | Bucky Qian",
   description:
-    "How the Ask Bucky AI portfolio demo handles questions, voice recordings, temporary documents, and unanswered-question feedback.",
+    "How the Ask Bucky AI portfolio demo handles questions, answer caching, voice recordings, temporary documents, and unanswered-question feedback.",
   alternates: {
     canonical: "https://buckyqian.com/privacy",
   },
@@ -39,6 +39,13 @@ export default function PrivacyPage() {
               retrieval score, review status, and creation time in Supabase.
               Uploaded document text is never included in that record.
             </p>
+            <p>
+              For successful profile-only answers, the application may cache
+              the generated answer and its public profile source references for
+              up to 30 days. The cache uses a server-keyed digest instead of the
+              successful question text and is automatically bypassed for
+              uploaded documents.
+            </p>
           </div>
         </section>
 
@@ -48,8 +55,8 @@ export default function PrivacyPage() {
             <h2 id="privacy-not-collected">What is not saved</h2>
             <p>
               The feedback record does not include raw IP addresses, user
-              identity, successful questions, chat history, uploaded files, or
-              voice data. Inputs that appear to contain contact details,
+              identity, successful question text, chat history, uploaded files,
+              or voice data. Inputs that appear to contain contact details,
               credentials, or obvious spam are excluded from feedback logging.
             </p>
           </div>
@@ -78,7 +85,9 @@ export default function PrivacyPage() {
               Temporary audio and document context expire when the current page
               session ends or the attachment is removed. Separately, eligible
               unanswered question text may be retained for human review until it
-              is reviewed or deleted. Hashed network identifiers are used only to
+              is reviewed or deleted. Cached public-profile answers expire after
+              no more than 30 days and are invalidated when the profile or answer
+              configuration changes. Hashed network identifiers are used only to
               enforce daily demo limits; raw IP addresses are not stored by the
               application.
             </p>
@@ -97,7 +106,7 @@ export default function PrivacyPage() {
       </div>
 
       <footer className="mini-rag-footer">
-        <time dateTime="2026-09-20">Last updated / Sep 20, 2026</time>
+        <time dateTime="2026-10-01">Last updated / Oct 1, 2026</time>
         <div>
           <Link href="/projects/mini-rag">Ask Bucky AI</Link>
           <Link href="/">Return to portfolio</Link>

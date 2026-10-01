@@ -124,6 +124,27 @@ describe("AskBucky session usage", () => {
     expect(window.sessionStorage.getItem("ask-bucky-successful-questions")).toBeNull();
   });
 
+  it("counts a shared cache hit as a successful browser-session answer", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(200, {
+        answer: "Cached grounded answer.",
+        answerMode: "cache",
+        countsTowardLimit: true,
+        sources: [],
+      }),
+    );
+    const { askButton, input, user } = await renderReady();
+
+    await user.type(input, "What did Bucky work on at Apple?");
+    await user.click(askButton);
+    await screen.findByText("Cached grounded answer.");
+
+    expect(screen.getByText("2 questions remaining")).toBeTruthy();
+    expect(
+      window.sessionStorage.getItem("ask-bucky-successful-questions"),
+    ).toBe("1");
+  });
+
   it("counts only three successful answers and then disables the form", async () => {
     fetchMock
       .mockResolvedValueOnce(jsonResponse(200, { answer: "Grounded answer 1" }))

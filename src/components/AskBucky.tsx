@@ -39,7 +39,12 @@ interface Message {
 
 interface AskResponse {
   answer?: string;
-  code?: "DAILY_LIMIT" | "INSUFFICIENT_CONTEXT" | "OUT_OF_SCOPE";
+  answerMode?: "cache" | "direct" | "generated" | "offline";
+  code?:
+    | "ANSWER_PENDING"
+    | "DAILY_LIMIT"
+    | "INSUFFICIENT_CONTEXT"
+    | "OUT_OF_SCOPE";
   countsTowardLimit?: boolean;
   error?: string;
   remainingDaily?: number;

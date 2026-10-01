@@ -4,7 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://buckyqian.com/",
-      lastModified: "2026-09-24",
+      lastModified: "2026-10-01",
       changeFrequency: "monthly",
       priority: 1,
     },
@@ -22,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "https://buckyqian.com/privacy",
-      lastModified: "2026-09-20",
+      lastModified: "2026-10-01",
       changeFrequency: "yearly",
       priority: 0.2,
     },

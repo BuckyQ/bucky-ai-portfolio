@@ -18,6 +18,13 @@ export const AI_CONFIG = {
   answerModel: "gpt-4o-mini",
   maxAnswerTokens: 300,
   maxAnswerWords: 200,
+  answerCacheVersion: "2026-09-26-v1",
+  answerCacheTtlSeconds: 30 * 24 * 60 * 60,
+  answerCacheLeaseSeconds: 60,
+  answerCacheWaitMilliseconds: 8_000,
+  answerCachePollMilliseconds: 125,
+  answerCacheMaxPollMilliseconds: 1_000,
+  maxCachedAnswerCharacters: 4_000,
 } as const;
 
 export const OUT_OF_SCOPE_MESSAGE =
@@ -28,3 +35,6 @@ export const INSUFFICIENT_PROFILE_MESSAGE =
 
 export const DAILY_LIMIT_MESSAGE =
   "You've reached today's AI demo limit. You can still explore Bucky's projects, GitHub, and experience.";
+
+export const ANSWER_PENDING_MESSAGE =
+  "A matching answer is being prepared. Please try again in a moment.";

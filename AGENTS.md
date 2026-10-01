@@ -729,6 +729,24 @@ After changing public content, routes, metadata, navigation, or rendering:
   reservation. These responses must not call embeddings or answer generation,
   consume question limits, or enter unanswered-question feedback. Natural
   questions about who Bucky is still use the grounded RAG flow.
+- For profile-only questions, check a shared exact-answer cache before
+  reserving daily AI quota. Derive cache keys with a server-only HMAC over the
+  normalized question, profile-index `sourceHash`, prompt/cache version, model,
+  and retrieval configuration; never persist successful question text.
+- Use one atomic shared generation lease per cache key so concurrent misses do
+  not stampede the embedding or answer APIs. Cache only successful grounded
+  answers and public profile source references. Rejects, errors, rate limits,
+  temporary documents, uploaded text, and unanswered-question records must
+  never enter the answer cache.
+- Cache hits and built-in offline profile answers count toward the browser's
+  three successful answers but do not consume the ten-answer daily AI-cost
+  quota. Only a request that actually reserves and retains an AI generation
+  slot consumes that daily quota. Cache failures must fail open to the existing
+  grounded RAG path; an unavailable cache must not make the assistant fail.
+- Keep a small, verified set of built-in professional answers for common
+  recruiter questions so those prompts remain useful during an OpenAI or
+  shared-service outage. Do not add semantic caching without explicit approval;
+  exact cache matching must not broaden one question into another intent.
 - After a valid question is submitted, collapse the suggestion guide so the
   conversation gains space, keep an accessible control to reopen it, and have
   the message viewport follow new questions, loading states, and answers.
@@ -749,8 +767,8 @@ After changing public content, routes, metadata, navigation, or rendering:
   be discarded when removed or the session ends. File parsing failures are not
   unanswered profile questions.
 - Keep voice, file, suggested, and typed input normalized into the one Ask Bucky
-  answer route. Only a successful grounded final answer consumes the 3-question
-  browser allowance or 10-answer daily IP allowance.
+  answer route. Only a successful answer consumes the 3-question browser
+  allowance. A cached or built-in answer does not consume daily AI quota.
 - The Ask Bucky route may use the in-memory rate-limit store only for local
   development and automated tests. Production must use a shared atomic store:
   the Supabase RPC migration is the default, while Upstash Redis remains an
@@ -771,6 +789,8 @@ After changing public content, routes, metadata, navigation, or rendering:
 - Keep `/privacy` accurate whenever Ask Bucky data collection, subprocessors,
   retention, or contact handling changes.
 - Keep API keys and other MiniRAG secrets only in ignored `.env.local` files.
+  `ASK_BUCKY_CACHE_SECRET` may provide a dedicated cache-key HMAC secret; when
+  absent, the existing server-only Supabase secret is the fallback.
 
 ## Change Workflow
 

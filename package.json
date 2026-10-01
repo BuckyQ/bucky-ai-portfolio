@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:concurrency": "tsx scripts/concurrency-test.ts",
+    "test:concurrency": "node --import tsx scripts/concurrency-test.ts",
     "rag:index": "tsx scripts/build-profile-index.ts",
     "rag:check": "tsx scripts/build-profile-index.ts --check"
   },

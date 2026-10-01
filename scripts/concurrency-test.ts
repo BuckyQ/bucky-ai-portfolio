@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 
+import { createMemoryAnswerCacheStore } from "../src/lib/answer-cache-core";
 import { createMemoryDailyRateLimitStore } from "../src/lib/rate-limit-core";
 
 const limit = 10;
@@ -80,7 +81,62 @@ function assertStatusCounts(
   );
 }
 
+async function assertAnswerCacheCoalescing(): Promise<void> {
+  const store = createMemoryAnswerCacheStore();
+  const ownerTokens = Array.from(
+    { length: 20 },
+    (_, index) => `cache-owner-${index}`,
+  );
+  const claims = await Promise.all(
+    ownerTokens.map((ownerToken) =>
+      store.claim({
+        key: "same-normalized-question",
+        ownerToken,
+        leaseSeconds: 60,
+      }),
+    ),
+  );
+  const ownerIndex = claims.findIndex((claim) => claim.status === "owner");
+  const ownerCount = claims.filter((claim) => claim.status === "owner").length;
+  const pendingCount = claims.filter(
+    (claim) => claim.status === "pending",
+  ).length;
+
+  if (ownerCount !== 1 || pendingCount !== 19 || ownerIndex < 0) {
+    throw new Error(
+      `answer-cache coalescing failed: expected 1 owner and 19 waiters, received ${ownerCount} owners and ${pendingCount} waiters.`,
+    );
+  }
+
+  const stored = await store.store({
+    key: "same-normalized-question",
+    ownerToken: ownerTokens[ownerIndex],
+    answer: "One shared grounded answer.",
+    sources: [],
+    ttlSeconds: 300,
+  });
+  const laterClaims = await Promise.all(
+    Array.from({ length: 20 }, (_, index) =>
+      store.claim({
+        key: "same-normalized-question",
+        ownerToken: `later-${index}`,
+        leaseSeconds: 60,
+      }),
+    ),
+  );
+
+  if (!stored || laterClaims.some((claim) => claim.status !== "hit")) {
+    throw new Error("answer-cache fan-out failed after the owner stored its answer.");
+  }
+
+  console.log(
+    "20-request cache burst: 1 generator, 19 waiters, then 20 shared hits (passed)",
+  );
+}
+
 async function main(): Promise<void> {
+  await assertAnswerCacheCoalescing();
+
   for (let index = 0; index < limit - 1; index += 1) {
     await finalSlotStore.reserve({
       key: "final-slot",

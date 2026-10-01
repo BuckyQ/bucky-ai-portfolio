@@ -5,6 +5,9 @@ import { AI_CONFIG, DAILY_LIMIT_MESSAGE } from "@/config/ai";
 const mocks = vi.hoisted(() => ({
   after: vi.fn(),
   answerQuestion: vi.fn(),
+  cacheRelease: vi.fn(),
+  cacheStore: vi.fn(),
+  prepareAnswerCache: vi.fn(),
   reserveAiQuestion: vi.fn(),
   safelySaveUnansweredQuestion: vi.fn(),
 }));
@@ -15,6 +18,10 @@ vi.mock("next/server", () => ({
 
 vi.mock("@/lib/rate-limit", () => ({
   reserveAiQuestion: mocks.reserveAiQuestion,
+}));
+
+vi.mock("@/lib/answer-cache", () => ({
+  prepareAnswerCache: mocks.prepareAnswerCache,
 }));
 
 vi.mock("@/lib/rag/generate", () => ({
@@ -58,6 +65,15 @@ beforeEach(() => {
   mocks.after.mockImplementation((callback: () => unknown) => {
     void Promise.resolve().then(callback).catch(() => undefined);
   });
+  mocks.cacheRelease.mockResolvedValue(undefined);
+  mocks.cacheStore.mockResolvedValue(true);
+  mocks.prepareAnswerCache.mockResolvedValue({
+    status: "owner",
+    lease: {
+      release: mocks.cacheRelease,
+      store: mocks.cacheStore,
+    },
+  });
   mocks.safelySaveUnansweredQuestion.mockResolvedValue(undefined);
 });
 
@@ -77,6 +93,7 @@ describe("POST /api/ask-bucky input validation", () => {
     const response = await POST(makeRequest(body));
 
     expect(response.status).toBe(400);
+    expect(mocks.prepareAnswerCache).not.toHaveBeenCalled();
     expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
     expect(mocks.answerQuestion).not.toHaveBeenCalled();
     expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
@@ -92,6 +109,7 @@ describe("POST /api/ask-bucky input validation", () => {
     const response = await POST(request);
 
     expect(response.status).toBe(400);
+    expect(mocks.prepareAnswerCache).not.toHaveBeenCalled();
     expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
     expect(mocks.answerQuestion).not.toHaveBeenCalled();
   });
@@ -110,6 +128,7 @@ describe("POST /api/ask-bucky input validation", () => {
     );
 
     expect(response.status).toBe(415);
+    expect(mocks.prepareAnswerCache).not.toHaveBeenCalled();
     expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
     expect(mocks.answerQuestion).not.toHaveBeenCalled();
   });
@@ -130,14 +149,64 @@ describe("POST /api/ask-bucky request flow", () => {
       expect(response.status).toBe(200);
       expect(payload).toMatchObject({
         answer: expect.stringContaining("Bucky"),
+        answerMode: "direct",
         countsTowardLimit: false,
         sources: [],
       });
+      expect(mocks.prepareAnswerCache).not.toHaveBeenCalled();
       expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
       expect(mocks.answerQuestion).not.toHaveBeenCalled();
       expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
     },
   );
+
+  it("returns a shared cache hit without reserving daily AI quota", async () => {
+    mocks.prepareAnswerCache.mockResolvedValueOnce({
+      status: "hit",
+      value: {
+        answer: "Cached grounded answer.",
+        sources: [
+          {
+            id: "experience-chunk-0",
+            title: "Bucky Profile: Experience",
+            type: "bucky-profile",
+            score: 0.91,
+          },
+        ],
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 60_000,
+      },
+    });
+
+    const response = await POST(
+      makeRequest({ question: "What did Bucky work on at Apple?" }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      answer: "Cached grounded answer.",
+      answerMode: "cache",
+      countsTowardLimit: true,
+    });
+    expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
+    expect(mocks.answerQuestion).not.toHaveBeenCalled();
+  });
+
+  it("does not start duplicate AI work while an identical answer is pending", async () => {
+    mocks.prepareAnswerCache.mockResolvedValueOnce({ status: "busy" });
+
+    const response = await POST(
+      makeRequest({ question: "What databases has Bucky used professionally?" }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("Retry-After")).toBe("2");
+    expect(payload.code).toBe("ANSWER_PENDING");
+    expect(mocks.reserveAiQuestion).not.toHaveBeenCalled();
+    expect(mocks.answerQuestion).not.toHaveBeenCalled();
+  });
 
   it("returns a grounded answer and keeps the successful reservation", async () => {
     const reservation = makeReservation({ remaining: 8 });
@@ -167,6 +236,7 @@ describe("POST /api/ask-bucky request flow", () => {
     expect(response.status).toBe(200);
     expect(payload).toMatchObject({
       answer: "Bucky built frontend product experiences at Apple.",
+      answerMode: "generated",
       countsTowardLimit: true,
       remainingDaily: 8,
     });
@@ -176,6 +246,17 @@ describe("POST /api/ask-bucky request flow", () => {
       "What did Bucky work on at Apple?",
     );
     expect(reservation.release).not.toHaveBeenCalled();
+    expect(mocks.cacheStore).toHaveBeenCalledWith({
+      answer: "Bucky built frontend product experiences at Apple.",
+      sources: [
+        {
+          id: "experience-chunk-0",
+          title: "Bucky Profile: Experience",
+          type: "bucky-profile",
+          score: 0.91,
+        },
+      ],
+    });
     expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
   });
 
@@ -230,6 +311,8 @@ describe("POST /api/ask-bucky request flow", () => {
       "How does Bucky match this role?",
       { temporaryDocument },
     );
+    expect(mocks.prepareAnswerCache).not.toHaveBeenCalled();
+    expect(mocks.cacheStore).not.toHaveBeenCalled();
     expect(payload.sources).toEqual([
       expect.objectContaining({
         title: "Bucky Profile: Mini RAG Project",
@@ -248,13 +331,14 @@ describe("POST /api/ask-bucky request flow", () => {
     );
 
     const response = await POST(
-      makeRequest({ question: "What AI projects has Bucky built?" }),
+      makeRequest({ question: "What cloud platforms has Bucky used?" }),
     );
     const payload = await response.json();
 
     expect(response.status).toBe(429);
     expect(response.headers.get("Retry-After")).toBe("120");
     expect(payload).toEqual({ error: DAILY_LIMIT_MESSAGE, code: "DAILY_LIMIT" });
+    expect(mocks.cacheRelease).toHaveBeenCalledOnce();
     expect(mocks.answerQuestion).not.toHaveBeenCalled();
   });
 
@@ -275,6 +359,7 @@ describe("POST /api/ask-bucky request flow", () => {
 
     expect(response.status).toBe(422);
     expect(reservation.release).toHaveBeenCalledOnce();
+    expect(mocks.cacheRelease).toHaveBeenCalledOnce();
     await vi.waitFor(() => {
       expect(mocks.safelySaveUnansweredQuestion).toHaveBeenCalledWith({
         question: "What certifications does Bucky have?",
@@ -373,17 +458,67 @@ describe("POST /api/ask-bucky request flow", () => {
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
       const response = await POST(
-        makeRequest({ question: "What did Bucky work on at Apple?" }),
+        makeRequest({ question: "What databases has Bucky used professionally?" }),
       );
       const payload = await response.json();
 
       expect(response.status).toBe(503);
       expect(payload).toEqual({ error: "Ask Bucky is temporarily unavailable." });
       expect(reservation.release).toHaveBeenCalledOnce();
+      expect(mocks.cacheRelease).toHaveBeenCalledOnce();
       expect(mocks.safelySaveUnansweredQuestion).not.toHaveBeenCalled();
       expect(consoleError).toHaveBeenCalled();
     },
   );
+
+  it("uses a built-in profile answer when live generation is unavailable", async () => {
+    const reservation = makeReservation();
+    mocks.reserveAiQuestion.mockResolvedValue(reservation);
+    mocks.answerQuestion.mockRejectedValue(new Error("OpenAI unavailable"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const response = await POST(
+      makeRequest({ question: "What did Bucky work on at Apple?" }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      answer: expect.stringContaining("At Apple"),
+      answerMode: "offline",
+      countsTowardLimit: true,
+      sources: [],
+    });
+    expect(reservation.release).toHaveBeenCalledOnce();
+    expect(mocks.cacheRelease).toHaveBeenCalledOnce();
+  });
+
+  it("fails open when the shared cache is unavailable", async () => {
+    const reservation = makeReservation();
+    mocks.prepareAnswerCache.mockRejectedValueOnce(
+      new Error("cache migration missing"),
+    );
+    mocks.reserveAiQuestion.mockResolvedValue(reservation);
+    mocks.answerQuestion.mockResolvedValue({
+      status: "answered",
+      answer: "Fresh grounded answer.",
+      sources: [],
+    });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const response = await POST(
+      makeRequest({ question: "What skills does Bucky use?" }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.answer).toBe("Fresh grounded answer.");
+    expect(mocks.reserveAiQuestion).toHaveBeenCalledOnce();
+    expect(mocks.answerQuestion).toHaveBeenCalledOnce();
+    expect(consoleError).toHaveBeenCalledWith(
+      "Ask Bucky shared answer cache is unavailable; continuing without cache.",
+    );
+  });
 
   it("returns the fallback even when deferred feedback logging rejects", async () => {
     const reservation = makeReservation();
