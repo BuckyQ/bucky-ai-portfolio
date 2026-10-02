@@ -37,14 +37,15 @@ export default function PrivacyPage() {
               When the assistant cannot answer a valid professional question,
               it may save the question text, a failure category, the highest
               retrieval score, review status, and creation time in Supabase.
-              Uploaded document text is never included in that record.
+              Uploaded or pasted document text is never included in that
+              record.
             </p>
             <p>
               For successful profile-only answers, the application may cache
               the generated answer and its public profile source references for
               up to 30 days. The cache uses a server-keyed digest instead of the
               successful question text and is automatically bypassed for
-              uploaded documents.
+              temporary uploaded or pasted documents.
             </p>
           </div>
         </section>
@@ -56,8 +57,9 @@ export default function PrivacyPage() {
             <p>
               The feedback record does not include raw IP addresses, user
               identity, successful question text, chat history, uploaded files,
-              or voice data. Inputs that appear to contain contact details,
-              credentials, or obvious spam are excluded from feedback logging.
+              pasted document text, or voice data. Inputs that appear to contain
+              contact details, credentials, or obvious spam are excluded from
+              feedback logging.
             </p>
           </div>
         </section>
@@ -69,10 +71,11 @@ export default function PrivacyPage() {
             <p>
               Voice audio is sent through this site&apos;s server to OpenAI for
               transcription, then discarded by the application. PDF and TXT
-              files are parsed for the current assistant session only. Selected
-              text may be sent to OpenAI with a question to produce the answer,
-              but files and extracted text are not placed in Supabase Storage or
-              Bucky&apos;s permanent profile index.
+              files and pasted comparison text are processed for the current
+              assistant session only. Selected text may be sent to OpenAI with
+              a question to produce the answer, but files and extracted or
+              pasted text are not placed in Supabase Storage or Bucky&apos;s
+              permanent profile index.
             </p>
           </div>
         </section>
@@ -82,14 +85,14 @@ export default function PrivacyPage() {
           <div>
             <h2 id="privacy-retention">What remains</h2>
             <p>
-              Temporary audio and document context expire when the current page
-              session ends or the attachment is removed. Separately, eligible
-              unanswered question text may be retained for human review until it
-              is reviewed or deleted. Cached public-profile answers expire after
-              no more than 30 days and are invalidated when the profile or answer
-              configuration changes. Hashed network identifiers are used only to
-              enforce daily demo limits; raw IP addresses are not stored by the
-              application.
+              Temporary audio and uploaded or pasted document context expire
+              when the current page session ends or the context is removed.
+              Separately, eligible unanswered question text may be retained for
+              human review until it is reviewed or deleted. Cached public-profile
+              answers expire after no more than 30 days and are invalidated when
+              the profile or answer configuration changes. Hashed network
+              identifiers are used only to enforce daily demo limits; raw IP
+              addresses are not stored by the application.
             </p>
           </div>
         </section>

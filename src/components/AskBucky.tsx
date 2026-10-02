@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   ArrowUp,
   ArrowUpRight,
   ChevronDown,
@@ -91,6 +92,7 @@ export default function AskBucky() {
   const [suggestionsExpanded, setSuggestionsExpanded] = useState(true);
   const [temporaryDocument, setTemporaryDocument] =
     useState<TemporaryDocument | null>(null);
+  const [pastedDocumentText, setPastedDocumentText] = useState("");
   const [documentError, setDocumentError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentRequestInFlight = useRef(false);
@@ -301,6 +303,8 @@ export default function AskBucky() {
       }
 
       setTemporaryDocument(data.document);
+      setPastedDocumentText("");
+      setSuggestionsExpanded(true);
     } catch (error) {
       setTemporaryDocument(null);
       setDocumentError(
@@ -312,6 +316,31 @@ export default function AskBucky() {
       documentRequestInFlight.current = false;
       setIsDocumentLoading(false);
     }
+  }
+
+  function enablePastedComparison() {
+    const text = pastedDocumentText.trim();
+    if (!text || inputDisabled) return;
+
+    if (text.length > AI_CONFIG.maxExtractedCharacters) {
+      setDocumentError("The pasted text is too long for this demo.");
+      return;
+    }
+
+    const size = new Blob([text], { type: "text/plain" }).size;
+    if (size > AI_CONFIG.maxFileBytes) {
+      setDocumentError("The pasted text must be 5 MB or smaller.");
+      return;
+    }
+
+    setDocumentError(null);
+    setTemporaryDocument({
+      fileName: "pasted-job-description.txt",
+      mimeType: "text/plain",
+      size,
+      text,
+    });
+    setSuggestionsExpanded(true);
   }
 
   const voiceStatusLabel =
@@ -353,7 +382,11 @@ export default function AskBucky() {
           <button
             aria-pressed={inputMode === "document"}
             disabled={isLoading || isDocumentLoading || voiceBusy}
-            onClick={() => setInputMode("document")}
+            onClick={() => {
+              setDocumentError(null);
+              setInputMode("document");
+              if (!temporaryDocument) setSuggestionsExpanded(false);
+            }}
             type="button"
           >
             Compare a Job / Document
@@ -367,10 +400,13 @@ export default function AskBucky() {
       </div>
 
       {inputMode === "document" ? (
-        <div className="ask-bucky-document" aria-live="polite">
+        <div
+          className={`ask-bucky-document${temporaryDocument ? " is-active" : " is-empty"}`}
+          aria-live="polite"
+        >
           <input
             accept={DOCUMENT_ACCEPT}
-            aria-label="Upload a PDF or TXT document"
+            aria-label="Upload a PDF or TXT job description"
             disabled={inputDisabled}
             hidden
             onChange={handleFileSelection}
@@ -378,43 +414,90 @@ export default function AskBucky() {
             type="file"
           />
           {temporaryDocument ? (
-            <div className="ask-bucky-file">
-              <FileText aria-hidden="true" />
-              <div>
-                <strong>{temporaryDocument.fileName}</strong>
-                <span>{(temporaryDocument.size / 1024).toFixed(1)} KB / Temporary</span>
+            <>
+              <div className="ask-bucky-file">
+                <FileText aria-hidden="true" />
+                <div>
+                  <strong>
+                    {temporaryDocument.fileName ===
+                    "pasted-job-description.txt"
+                      ? "Pasted job description"
+                      : temporaryDocument.fileName}
+                  </strong>
+                  <span>
+                    {(temporaryDocument.size / 1024).toFixed(1)} KB / Temporary
+                  </span>
+                </div>
+                <button
+                  aria-label={`Remove ${temporaryDocument.fileName}`}
+                  disabled={inputDisabled}
+                  onClick={() => {
+                    setTemporaryDocument(null);
+                    setPastedDocumentText("");
+                    setDocumentError(null);
+                    setSuggestionsExpanded(false);
+                  }}
+                  type="button"
+                >
+                  <Trash2 aria-hidden="true" />
+                </button>
               </div>
-              <button
-                aria-label={`Remove ${temporaryDocument.fileName}`}
-                disabled={inputDisabled}
-                onClick={() => {
-                  setTemporaryDocument(null);
-                  setDocumentError(null);
-                }}
-                type="button"
-              >
-                <Trash2 aria-hidden="true" />
-              </button>
-            </div>
+              <p className="ask-bucky-comparison-status">
+                <span aria-hidden="true" /> Comparison enabled
+              </p>
+              <p>Ask how Bucky&apos;s experience relates to this context.</p>
+            </>
           ) : (
-            <button
-              className="ask-bucky-upload"
-              disabled={inputDisabled}
-              onClick={() => fileInputRef.current?.click()}
-              type="button"
-            >
-              {isDocumentLoading ? (
-                <LoaderCircle aria-hidden="true" className="is-spinning" />
-              ) : (
-                <Paperclip aria-hidden="true" />
-              )}
-              <span>{isDocumentLoading ? "Reading document" : "Upload PDF or TXT"}</span>
-              <small>5 MB max</small>
-            </button>
+            <div className="ask-bucky-document-options">
+              <div className="ask-bucky-document-option is-upload">
+                <span>Upload a job description</span>
+                <button
+                  className="ask-bucky-upload"
+                  disabled={inputDisabled}
+                  onClick={() => fileInputRef.current?.click()}
+                  type="button"
+                >
+                  {isDocumentLoading ? (
+                    <LoaderCircle aria-hidden="true" className="is-spinning" />
+                  ) : (
+                    <Paperclip aria-hidden="true" />
+                  )}
+                  <span>
+                    {isDocumentLoading ? "Reading document" : "Choose PDF or TXT"}
+                  </span>
+                  <small>5 MB max</small>
+                </button>
+              </div>
+              <span className="ask-bucky-document-or">Or</span>
+              <div className="ask-bucky-document-option is-paste">
+                <label htmlFor="ask-bucky-document-text">
+                  Paste a job description or project brief
+                </label>
+                <div>
+                  <textarea
+                    disabled={inputDisabled}
+                    id="ask-bucky-document-text"
+                    maxLength={AI_CONFIG.maxExtractedCharacters}
+                    onChange={(event) => {
+                      setPastedDocumentText(event.target.value);
+                      setDocumentError(null);
+                    }}
+                    placeholder="Paste text here..."
+                    value={pastedDocumentText}
+                  />
+                  <button
+                    className="ask-bucky-enable-comparison"
+                    disabled={inputDisabled || !pastedDocumentText.trim()}
+                    onClick={enablePastedComparison}
+                    type="button"
+                  >
+                    <ArrowLeftRight aria-hidden="true" />
+                    <span>Enable comparison</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
-          {temporaryDocument ? (
-            <p>Ask how Bucky&apos;s experience relates to this document.</p>
-          ) : null}
           {documentError ? <p className="ask-bucky-error" role="alert">{documentError}</p> : null}
         </div>
       ) : null}

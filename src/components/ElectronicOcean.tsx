@@ -4,6 +4,14 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Water } from "three/examples/jsm/objects/Water.js";
 
+import type { OceanQuality } from "@/lib/ocean-performance";
+
+interface ElectronicOceanProps {
+  motionEnabled: boolean;
+  onPerformancePressure?: (action: "pause" | "reduce") => void;
+  quality: OceanQuality;
+}
+
 type FishState = {
   direction: THREE.Vector2;
   mesh: THREE.Mesh;
@@ -281,14 +289,19 @@ function addPointerRipple(material: THREE.ShaderMaterial) {
   material.needsUpdate = true;
 }
 
-export default function ElectronicOcean() {
+export default function ElectronicOcean({
+  motionEnabled,
+  onPerformancePressure,
+  quality,
+}: ElectronicOceanProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    if (!motionEnabled) return;
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedQuality = quality === "reduced";
     const compactViewport = window.innerWidth < 700;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x020508);
@@ -297,13 +310,22 @@ export default function ElectronicOcean() {
     camera.position.set(0, compactViewport ? 5.2 : 4.3, compactViewport ? 11.5 : 10.5);
     camera.lookAt(0, 0, compactViewport ? -14 : -17);
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: false,
-      powerPreference: "high-performance",
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: !reducedQuality,
+        alpha: false,
+        powerPreference: reducedQuality ? "low-power" : "high-performance",
+      });
+    } catch {
+      onPerformancePressure?.("pause");
+      return;
+    }
     renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio, reducedMotion ? 1 : compactViewport ? 1.25 : 1.75),
+      Math.min(
+        window.devicePixelRatio,
+        reducedQuality ? 1 : compactViewport ? 1.25 : 1.75,
+      ),
     );
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -313,8 +335,15 @@ export default function ElectronicOcean() {
     const textureLoader = new THREE.TextureLoader();
     const moonTexture = textureLoader.load("/moon_1024.jpg");
     moonTexture.colorSpace = THREE.SRGBColorSpace;
-    moonTexture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
-    const moonGeometry = new THREE.SphereGeometry(compactViewport ? 1.34 : 1.55, 40, 28);
+    moonTexture.anisotropy = Math.min(
+      renderer.capabilities.getMaxAnisotropy(),
+      reducedQuality ? 2 : 8,
+    );
+    const moonGeometry = new THREE.SphereGeometry(
+      compactViewport ? 1.34 : 1.55,
+      reducedQuality ? 24 : 40,
+      reducedQuality ? 16 : 28,
+    );
     const moonMaterial = new THREE.MeshBasicMaterial({
       color: 0xeaf2f5,
       map: moonTexture,
@@ -411,7 +440,7 @@ export default function ElectronicOcean() {
       transparent: true,
     });
     const fish: FishState[] = [];
-    const fishCount = reducedMotion ? 0 : compactViewport ? 3 : 6;
+    const fishCount = reducedQuality ? 0 : compactViewport ? 3 : 6;
 
     for (let index = 0; index < fishCount; index += 1) {
       const mesh = new THREE.Mesh(fishGeometry, fishMaterial);
@@ -439,21 +468,35 @@ export default function ElectronicOcean() {
     let pointerStrength = 0;
     let pointerStrengthTarget = 0;
     let frameId = 0;
-    let isVisible = true;
+    let documentVisible = !document.hidden;
+    let inViewport = true;
     let disposed = false;
     let lastFrameTime = performance.now();
+    let lastRenderedAt = 0;
+    let performanceWindowStartedAt = 0;
+    let renderedFrameCount = 0;
+    let performancePressureReported = false;
     let elapsed = 0;
     let hasPointerHit = false;
     let water: Water | null = null;
     let waterMaterial: THREE.ShaderMaterial | null = null;
+    const pointerEffectsEnabled = !reducedQuality;
+    const minimumFrameInterval = reducedQuality ? 1000 / 30 : 0;
 
     const normalTexture = textureLoader.load("/waternormals.jpg", (texture) => {
       if (disposed) return;
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       texture.colorSpace = THREE.NoColorSpace;
-      texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+      texture.anisotropy = Math.min(
+        renderer.capabilities.getMaxAnisotropy(),
+        reducedQuality ? 2 : 8,
+      );
 
-      const reflectionResolution = compactViewport ? 512 : 1024;
+      const reflectionResolution = reducedQuality
+        ? 256
+        : compactViewport
+          ? 512
+          : 1024;
       const moonDirection = new THREE.Vector3(-0.2, 0.22, -1).normalize();
       water = new Water(waterGeometry, {
         alpha: 1,
@@ -516,14 +559,6 @@ export default function ElectronicOcean() {
       pointerStrengthTarget = 0;
     };
 
-    const onVisibilityChange = () => {
-      isVisible = !document.hidden;
-      if (isVisible && !reducedMotion) {
-        lastFrameTime = performance.now();
-        frameId = window.requestAnimationFrame(render);
-      }
-    };
-
     const updateFish = (delta: number) => {
       fish.forEach((item) => {
         const toPointer = item.position.clone().sub(pointerWorld);
@@ -560,8 +595,42 @@ export default function ElectronicOcean() {
       });
     };
 
+    const reportPerformance = (frameTime: number) => {
+      if (performancePressureReported) return;
+      if (performanceWindowStartedAt === 0) {
+        performanceWindowStartedAt = frameTime;
+        return;
+      }
+
+      renderedFrameCount += 1;
+      const sampleDuration = frameTime - performanceWindowStartedAt;
+      if (sampleDuration < 3_500) return;
+
+      const measuredFps = (renderedFrameCount * 1000) / sampleDuration;
+      if (!reducedQuality && measuredFps < 42) {
+        performancePressureReported = true;
+        onPerformancePressure?.("reduce");
+      } else if (reducedQuality && measuredFps < 22) {
+        performancePressureReported = true;
+        onPerformancePressure?.("pause");
+      } else {
+        performanceWindowStartedAt = frameTime;
+        renderedFrameCount = 0;
+      }
+    };
+
     const render = (frameTime = performance.now()) => {
-      if (!isVisible) return;
+      frameId = 0;
+      if (!documentVisible || !inViewport) return;
+      if (
+        minimumFrameInterval > 0 &&
+        frameTime - lastRenderedAt < minimumFrameInterval
+      ) {
+        frameId = window.requestAnimationFrame(render);
+        return;
+      }
+
+      lastRenderedAt = frameTime;
       const delta = Math.min((frameTime - lastFrameTime) / 1000, 0.05);
       lastFrameTime = frameTime;
       elapsed += delta;
@@ -582,27 +651,73 @@ export default function ElectronicOcean() {
       updateFish(delta);
       updateBoats();
       renderer.render(scene, camera);
+      reportPerformance(frameTime);
       frameId = window.requestAnimationFrame(render);
+    };
+
+    const stopAnimation = () => {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      frameId = 0;
+    };
+
+    const updateAnimationState = () => {
+      if (documentVisible && inViewport) {
+        if (!frameId) {
+          lastFrameTime = performance.now();
+          performanceWindowStartedAt = 0;
+          renderedFrameCount = 0;
+          frameId = window.requestAnimationFrame(render);
+        }
+        return;
+      }
+
+      stopAnimation();
+    };
+
+    const onVisibilityChange = () => {
+      documentVisible = !document.hidden;
+      updateAnimationState();
+    };
+
+    const intersectionObserver =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            ([entry]) => {
+              inViewport = entry?.isIntersecting ?? false;
+              updateAnimationState();
+            },
+            { rootMargin: "160px 0px", threshold: 0.01 },
+          )
+        : null;
+
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      stopAnimation();
+      onPerformancePressure?.("pause");
     };
 
     resize();
     renderer.render(scene, camera);
-    if (!reducedMotion) frameId = window.requestAnimationFrame(render);
+    frameId = window.requestAnimationFrame(render);
 
     window.addEventListener("resize", resize);
-    if (!reducedMotion) {
+    intersectionObserver?.observe(container);
+    renderer.domElement.addEventListener("webglcontextlost", onContextLost);
+    if (pointerEffectsEnabled) {
       window.addEventListener("pointermove", onPointerMove, { passive: true });
       document.documentElement.addEventListener("pointerleave", onPointerLeave);
-      document.addEventListener("visibilitychange", onVisibilityChange);
     }
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       disposed = true;
-      window.cancelAnimationFrame(frameId);
+      stopAnimation();
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointerMove);
       document.documentElement.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      intersectionObserver?.disconnect();
+      renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
       fish.forEach((item) => scene.remove(item.mesh));
       boats.forEach((boat) => {
         scene.remove(boat.group);
@@ -628,7 +743,7 @@ export default function ElectronicOcean() {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [motionEnabled, onPerformancePressure, quality]);
 
   return <div className="electronic-ocean" ref={containerRef} aria-hidden="true" />;
 }

@@ -1,11 +1,23 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, ArrowUpRight, Menu, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Menu, Pause, Play, Sparkles, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AskBuckyLauncher from "@/components/AskBuckyLauncher";
 import ElectronicOcean from "@/components/ElectronicOcean";
+import {
+  resolveOceanPerformance,
+  type OceanMotionPreference,
+  type OceanPerformanceSettings,
+} from "@/lib/ocean-performance";
+
+const oceanMotionPreferenceKey = "bucky-ocean-motion";
+
+type NavigatorWithPerformanceHints = Navigator & {
+  connection?: { saveData?: boolean };
+  deviceMemory?: number;
+};
 
 const signalBars = [31, 44, 38, 62, 48, 72, 54, 81, 67, 92, 58, 76, 45, 69, 52, 86, 63, 96, 74, 88, 66, 78, 59, 70];
 
@@ -320,6 +332,8 @@ function RagAmbient() {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [askBuckyOpen, setAskBuckyOpen] = useState(false);
+  const [oceanPerformance, setOceanPerformance] =
+    useState<OceanPerformanceSettings | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -331,6 +345,82 @@ export default function Home() {
   const heroFade = useTransform(scrollYProgress, [0, 0.58, 1], [1, 0.9, 0]);
   const heroLift = useTransform(scrollYProgress, [0, 0.5, 1], [0, -10, -76]);
   const transitionShade = useTransform(scrollYProgress, [0, 0.55, 1], [0.08, 0.32, 1]);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateOceanPerformance = () => {
+      const navigatorWithHints = navigator as NavigatorWithPerformanceHints;
+      let storedPreference: OceanMotionPreference = null;
+
+      try {
+        const storedValue = window.localStorage.getItem(
+          oceanMotionPreferenceKey,
+        );
+        if (storedValue === "on" || storedValue === "off") {
+          storedPreference = storedValue;
+        }
+      } catch {
+        // Automatic device hints still provide a safe default without storage.
+      }
+
+      setOceanPerformance(
+        resolveOceanPerformance({
+          deviceMemory: navigatorWithHints.deviceMemory,
+          hardwareConcurrency: navigator.hardwareConcurrency,
+          prefersReducedMotion: motionQuery.matches,
+          saveData: navigatorWithHints.connection?.saveData,
+          storedPreference,
+        }),
+      );
+    };
+
+    updateOceanPerformance();
+    motionQuery.addEventListener?.("change", updateOceanPerformance);
+    return () =>
+      motionQuery.removeEventListener?.("change", updateOceanPerformance);
+  }, []);
+
+  const handleOceanPerformancePressure = useCallback(
+    (action: "pause" | "reduce") => {
+      setOceanPerformance((current) => {
+        if (!current) return current;
+        if (action === "reduce") {
+          return current.quality === "reduced"
+            ? current
+            : { ...current, quality: "reduced" };
+        }
+
+        return current.motionEnabled
+          ? { ...current, motionEnabled: false, quality: "reduced" }
+          : current;
+      });
+    },
+    [],
+  );
+
+  const toggleOceanMotion = useCallback(() => {
+    setOceanPerformance((current) => {
+      if (!current) return current;
+      const motionEnabled = !current.motionEnabled;
+
+      try {
+        window.localStorage.setItem(
+          oceanMotionPreferenceKey,
+          motionEnabled ? "on" : "off",
+        );
+      } catch {
+        // The current page still honors the preference when storage is blocked.
+      }
+
+      return {
+        ...current,
+        motionEnabled,
+        quality:
+          current.constrainedDevice || !motionEnabled ? "reduced" : "full",
+      };
+    });
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -426,7 +516,15 @@ export default function Home() {
             filter: prefersReducedMotion ? "brightness(.86)" : oceanBrightness,
           }}
         >
-          <ElectronicOcean />
+          {oceanPerformance ? (
+            <ElectronicOcean
+              motionEnabled={oceanPerformance.motionEnabled}
+              onPerformancePressure={handleOceanPerformancePressure}
+              quality={oceanPerformance.quality}
+            />
+          ) : (
+            <div className="electronic-ocean" aria-hidden="true" />
+          )}
         </motion.div>
         <div className="hero-shade" />
         <div className="hero-sea-light" aria-hidden="true" />
@@ -488,6 +586,32 @@ export default function Home() {
             </div>
           </div>
         </motion.div>
+        {oceanPerformance ? (
+          <button
+            aria-label={
+              oceanPerformance.motionEnabled
+                ? "Pause animated ocean"
+                : "Enable animated ocean"
+            }
+            aria-pressed={oceanPerformance.motionEnabled}
+            className="ocean-motion-toggle"
+            data-quality={oceanPerformance.quality}
+            onClick={toggleOceanMotion}
+            type="button"
+          >
+            {oceanPerformance.motionEnabled ? (
+              <Pause aria-hidden="true" />
+            ) : (
+              <Play aria-hidden="true" />
+            )}
+            <span>
+              {oceanPerformance.motionEnabled ? "Pause ocean" : "Enable ocean"}
+            </span>
+            <small>
+              {oceanPerformance.quality === "reduced" ? "Low power" : "Full"}
+            </small>
+          </button>
+        ) : null}
       </section>
 
       <section className="profile" id="about" aria-labelledby="profile-title">

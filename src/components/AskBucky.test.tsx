@@ -508,13 +508,13 @@ describe("AskBucky temporary document input", () => {
       screen.getByRole("button", { name: "Compare a Job / Document" }),
     );
     await user.upload(
-      screen.getByLabelText("Upload a PDF or TXT document"),
+      screen.getByLabelText("Upload a PDF or TXT job description"),
       file,
     );
 
     await screen.findByText("role.txt");
     expect(
-      screen.getByText("Ask how Bucky's experience relates to this document."),
+      screen.getByText("Ask how Bucky's experience relates to this context."),
     ).toBeTruthy();
     await user.type(input, "How does Bucky match this role?");
     await user.click(askButton);
@@ -534,7 +534,9 @@ describe("AskBucky temporary document input", () => {
     await user.click(
       screen.getByRole("button", { name: "Compare a Job / Document" }),
     );
-    const input = screen.getByLabelText("Upload a PDF or TXT document");
+    const input = screen.getByLabelText(
+      "Upload a PDF or TXT job description",
+    );
 
     fireEvent.change(input, {
       target: {
@@ -558,12 +560,67 @@ describe("AskBucky temporary document input", () => {
       screen.getByRole("button", { name: "Compare a Job / Document" }),
     );
     await user.upload(
-      screen.getByLabelText("Upload a PDF or TXT document"),
+      screen.getByLabelText("Upload a PDF or TXT job description"),
       new File(["role"], "role.txt", { type: "text/plain" }),
     );
 
     await screen.findByText("This document could not be read.");
     expect(screen.getByText("3 questions remaining")).toBeTruthy();
     expect(window.sessionStorage.getItem("ask-bucky-successful-questions")).toBeNull();
+  });
+
+  it("enables a pasted comparison before sending the temporary context", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(200, {
+        answer: "Bucky's applied AI experience matches this context.",
+        sources: [],
+      }),
+    );
+    const { askButton, input, user } = await renderReady();
+
+    await user.click(
+      screen.getByRole("button", { name: "Compare a Job / Document" }),
+    );
+    const enableButton = screen.getByRole("button", {
+      name: "Enable comparison",
+    });
+    expect((enableButton as HTMLButtonElement).disabled).toBe(true);
+
+    await user.type(
+      screen.getByLabelText("Paste a job description or project brief"),
+      "Build production RAG systems with TypeScript.",
+    );
+    await user.click(enableButton);
+
+    expect(screen.getByText("Comparison enabled")).toBeTruthy();
+    expect(screen.getByText("Pasted job description")).toBeTruthy();
+    await user.type(input, "How does Bucky match this role?");
+    await user.click(askButton);
+    await screen.findByText(
+      "Bucky's applied AI experience matches this context.",
+    );
+
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string)).toEqual({
+      question: "How does Bucky match this role?",
+      temporaryDocument: {
+        fileName: "pasted-job-description.txt",
+        mimeType: "text/plain",
+        size: 45,
+        text: "Build production RAG systems with TypeScript.",
+      },
+    });
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Remove pasted-job-description.txt",
+      }),
+    );
+    expect(
+      (
+        screen.getByLabelText(
+          "Paste a job description or project brief",
+        ) as HTMLTextAreaElement
+      ).value,
+    ).toBe("");
   });
 });

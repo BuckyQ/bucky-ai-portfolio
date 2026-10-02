@@ -115,6 +115,12 @@ merge content that does not strengthen one of those three points.
 - Honor `prefers-reduced-motion`, pause animation while the document is hidden,
   cap pixel ratio and reflection resolution, and dispose all Three.js geometry,
   materials, textures, render targets, and event listeners during cleanup.
+- Adapt the ocean automatically to the visitor's device. Use available memory,
+  CPU, data-saver, and reduced-motion hints for the initial mode, then use
+  measured rendering FPS to step from full quality to a 30 FPS low-power mode
+  or a static frame. Stop rendering when Hero is outside the viewport. Keep a
+  small `Pause ocean` / `Enable ocean` control as a user override and fallback;
+  never require the visitor to understand GPU settings.
 - Keep the real Mini RAG assistant discoverable through the Hero action and a
   persistent bottom-right launcher. It must remain closed on initial load and
   open in the established dark editorial drawer rather than an empty or fake
@@ -761,6 +767,10 @@ After changing public content, routes, metadata, navigation, or rendering:
   at 5 MB and extracted text at 50,000 characters. Parse on the server, reuse
   the shared chunker, keep temporary retrieval separate from the checked-in
   profile index, and label profile versus uploaded-document sources clearly.
+- In comparison mode, present two explicit temporary-input paths: upload a PDF
+  or TXT job description, or paste a job description/project brief and choose
+  `Enable comparison`. Keep the active comparison state visible and make both
+  paths stack cleanly on mobile.
 - Never save uploaded files or extracted text to Supabase, Supabase Storage,
   unanswered-question feedback, or the permanent vector index. Temporary
   document context may live only in the current client session/request and must
