@@ -2942,3 +2942,5 @@ footer{padding-bottom:clamp(98px,8vw,112px)}
 .ask-bucky-modes>div{display:grid;grid-template-columns:1fr 1.4fr .8fr}
 .ask-bucky-modes>p{text-align:left}
 .ask-bucky-drawer .ask-bucky-modes button{min-height:44px;font-size:12px}
+.ask-bucky-drawer .ask-bucky-modes{flex-shrink:0}
+@media(max-width:520px){.ask-bucky-drawer .ask-bucky-modes>p{display:none}}

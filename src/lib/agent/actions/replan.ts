@@ -38,6 +38,8 @@ export async function replan(
 
     const response = await client.responses.parse({
         model: researchModel(),
+        max_output_tokens: 2000,
+        store: false,
 
         input: [{
             role: "system",

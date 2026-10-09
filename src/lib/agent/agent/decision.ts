@@ -14,6 +14,8 @@ export async function getDecision(
 ): Promise<Decision | null> {
     const response = await client.responses.parse({
   model: researchModel(),
+        max_output_tokens: 2000,
+        store: false,
   input: [
     {
       role: "system",

@@ -11,6 +11,8 @@ export async function webSearch(
   try {
    const response = await client.responses.create({
         model: researchModel(),
+        max_output_tokens: 2000,
+        store: false,
         tools: [{type: 'web_search'}],
 
         input: `search the web for information relevant to this research query :

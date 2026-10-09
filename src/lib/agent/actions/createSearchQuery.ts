@@ -22,6 +22,8 @@ export async function createSearchQuery(
 
     const response = await client.responses.parse({
         model: researchModel(),
+        max_output_tokens: 2000,
+        store: false,
         input: [{role: "system", content: `
         You generate targeted search queries for a research agent.
 

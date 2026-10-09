@@ -18,6 +18,8 @@ export async function analyze(
   // query + instruction + evidence
     const response = await client.responses.create({
         model: researchModel(),
+        max_output_tokens: 2000,
+        store: false,
         input: `
         query: ${state.query}
 
