@@ -24,6 +24,7 @@ export default function HandwrittenResearchAgentPage() {
         <h1>A small agent.<br /><em>An explicit control loop.</em></h1>
         <p>I built a handwritten research agent to understand how decisions, tools, state, and replanning work together. TypeScript controls the loop; the OpenAI client handles model calls and web search; Zod defines structured output contracts.</p>
         <div className="case-intro-actions">
+          <a href="#agent-graph">Explore interactive graph <ArrowUpRight aria-hidden="true" /></a>
           <a href="/projects/handwritten-research-agent/handwritten-research-agent.zip" download>Download source <ArrowUpRight aria-hidden="true" /></a>
           <a href="/projects/handwritten-research-agent/README.md">Read the README <ArrowUpRight aria-hidden="true" /></a>
         </div>

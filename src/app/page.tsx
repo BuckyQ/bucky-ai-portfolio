@@ -4,7 +4,6 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { ArrowDown, ArrowUpRight, Menu, Pause, Play, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import ResearchAgentGraph from "@/components/ResearchAgentGraph";
 import AskBuckyLauncher from "@/components/AskBuckyLauncher";
 import ElectronicOcean from "@/components/ElectronicOcean";
 import {
@@ -57,55 +56,6 @@ const ragStages = [
 ];
 
 const ragEvaluation = ["Precision@K", "Recall@K", "Faithfulness", "Answer Relevance"];
-
-const agentEngineeringDetails = [
-  {
-    label: "Orchestration",
-    value: "Planner-led multi-agent workflow with explicit specialist handoffs.",
-  },
-  {
-    label: "System contracts",
-    value: "Tool-connected research and structured outputs keep each stage reviewable.",
-  },
-  {
-    label: "Observability",
-    value: "Tracing exposes how evidence moves from research into interview strategy.",
-  },
-  {
-    label: "Quality control",
-    value: "Evidence evaluation and human review protect the final interview plan.",
-  },
-];
-
-const ragBuildDetails = [
-  {
-    label: "Ingestion",
-    value: "Document chunking with configurable chunk size, overlap, and metadata filtering.",
-  },
-  {
-    label: "Retrieval",
-    value: "Embeddings, cosine similarity, Top-K selection, and a configurable similarity threshold.",
-  },
-  {
-    label: "Context",
-    value: "Context construction from the strongest retrieved evidence before generation.",
-  },
-  {
-    label: "Generation",
-    value: "Grounded answer generation constrained to the selected profile context.",
-  },
-  {
-    label: "Evaluation",
-    value: "Precision@K, Recall@K, Faithfulness, and Answer Relevance checks.",
-  },
-];
-
-const ragFailureSignals = [
-  ["Low Precision", "Retrieval contains too much noise."],
-  ["Low Recall", "Relevant evidence is being missed."],
-  ["Good retrieval + low Faithfulness", "Generation is producing unsupported claims."],
-  ["Low Answer Relevance", "The answer is not directly addressing the user's question."],
-];
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -672,7 +622,7 @@ export default function Home() {
             <p className="section-label">02 / Selected Work</p>
             <h2 id="selected-work-title">Selected work.</h2>
             <p>Production AI product work, agent orchestration, and retrieval evaluation.
-              <a className="selected-work-demo-link" href="#research-demo">Explore the interactive research agent <ArrowDown aria-hidden="true" /></a>
+              <a className="selected-work-demo-link" href="/projects/handwritten-research-agent#agent-graph">Explore the research agent demo <ArrowUpRight aria-hidden="true" /></a>
             </p>
           </ProjectReveal>
 
@@ -771,34 +721,18 @@ export default function Home() {
                 <span>Tools</span><span>Structured output</span><span>Tracing</span><span>Evaluation</span>
               </div>
             </ProjectReveal>
-            <ProjectReveal className="engineering-details agent-engineering-details">
-              <header className="engineering-details-header">
-                <p className="project-view-label">Implementation / 02.2A</p>
-                <h4>Engineering Details</h4>
-              </header>
-              <dl className="engineering-detail-grid">
-                {agentEngineeringDetails.map((detail, index) => (
-                  <div key={detail.label}>
-                    <dt><span>{String(index + 1).padStart(2, "0")}</span>{detail.label}</dt>
-                    <dd>{detail.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <div className="project-actions" aria-label="AI Job Intelligence Agent actions">
-                <a className="project-action" href="/projects/ai-job-intelligence">
-                  View case study <ArrowUpRight aria-hidden="true" />
-                </a>
-                <a className="project-action" href="/projects/handwritten-research-agent">
-                  Handwritten research agent <ArrowUpRight aria-hidden="true" />
-                </a>
+            <div className="project-actions" aria-label="AI Job Intelligence Agent actions">
+              <a className="project-action" href="/projects/ai-job-intelligence">
+                Agent architecture + case study <ArrowUpRight aria-hidden="true" />
+              </a>
+            </div>
+            <section className="research-project-preview" id="research-demo" aria-labelledby="research-demo-title">
+              <div>
+                <p className="project-view-label">Related project / Handwritten research agent</p>
+                <h4 id="research-demo-title">An explicit research loop.</h4>
+                <p>A small TypeScript agent with structured decisions, evidence collection, and replanning. Explore its interactive walkthrough and source.</p>
               </div>
-            </ProjectReveal>
-            <section className="homepage-research-demo" id="research-demo" aria-labelledby="research-demo-title">
-              <p className="project-view-label">Handwritten agent / Interactive walkthrough</p>
-              <h4 id="research-demo-title">See the research loop in action.</h4>
-              <p>Step through decisions, web searches, analysis, and replanning in a small TypeScript agent. This walkthrough uses illustrative data.</p>
-              <ResearchAgentGraph />
-              <div className="project-actions"><a className="project-action" href="/projects/handwritten-research-agent">Project details + source <ArrowUpRight aria-hidden="true" /></a></div>
+              <a className="project-action" href="/projects/handwritten-research-agent#agent-graph">View research agent demo <ArrowUpRight aria-hidden="true" /></a>
             </section>
           </article>
 
@@ -826,64 +760,6 @@ export default function Home() {
               <span>Evaluation</span>
               {ragEvaluation.map((item) => <strong key={item}>{item}</strong>)}
             </ProjectReveal>
-            <ProjectReveal className="engineering-details rag-engineering-details">
-              <header className="engineering-details-header">
-                <p className="project-view-label">Implementation / 02.3A</p>
-                <h4>Engineering Details</h4>
-              </header>
-
-              <section className="engineering-subsection" aria-labelledby="rag-built-title">
-                <h5 id="rag-built-title"><span>A</span> What I Built</h5>
-                <dl className="engineering-detail-grid rag-build-grid">
-                  {ragBuildDetails.map((detail, index) => (
-                    <div key={detail.label}>
-                      <dt><span>{String(index + 1).padStart(2, "0")}</span>{detail.label}</dt>
-                      <dd>{detail.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
-
-              <section className="engineering-subsection" aria-labelledby="rag-evaluation-title">
-                <h5 id="rag-evaluation-title"><span>B</span> How I Evaluate It</h5>
-                <div className="rag-quality-groups">
-                  <div>
-                    <p>Retrieval Quality</p>
-                    <strong>Precision@K</strong>
-                    <strong>Recall@K</strong>
-                  </div>
-                  <div>
-                    <p>Answer Quality</p>
-                    <strong>Faithfulness</strong>
-                    <strong>Answer Relevance</strong>
-                  </div>
-                </div>
-                <dl className="rag-failure-signals">
-                  {ragFailureSignals.map(([signal, meaning]) => (
-                    <div key={signal}>
-                      <dt>{signal}</dt>
-                      <dd>{meaning}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </section>
-
-              <section className="engineering-subsection" aria-labelledby="rag-diagnosis-title">
-                <h5 id="rag-diagnosis-title"><span>C</span> Failure Diagnosis</h5>
-                <div className="diagnosis-flow" aria-label="RAG failure diagnosis flow">
-                  <ol>
-                    <li>Bad answer</li>
-                    <li>Check retrieval</li>
-                    <li>Precision / Recall</li>
-                    <li>Retrieval good?</li>
-                  </ol>
-                  <div className="diagnosis-branches">
-                    <div><span>No</span><strong>Fix retrieval</strong></div>
-                    <div><span>Yes</span><strong>Check Faithfulness / Relevance</strong><strong>Fix generation</strong></div>
-                  </div>
-                </div>
-              </section>
-
               <div className="project-actions" aria-label="RAG and Evaluation System actions">
                 <a className="project-action" href="/projects/mini-rag">
                   View case study <ArrowUpRight aria-hidden="true" />
@@ -898,7 +774,6 @@ export default function Home() {
                   Try Ask Bucky AI <Sparkles aria-hidden="true" />
                 </button>
               </div>
-            </ProjectReveal>
           </article>
         </div>
       </section>
