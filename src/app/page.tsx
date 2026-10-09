@@ -785,6 +785,9 @@ export default function Home() {
                 <a className="project-action" href="/projects/ai-job-intelligence">
                   View case study <ArrowUpRight aria-hidden="true" />
                 </a>
+                <a className="project-action" href="/projects/handwritten-research-agent">
+                  Handwritten research agent <ArrowUpRight aria-hidden="true" />
+                </a>
               </div>
             </ProjectReveal>
           </article>

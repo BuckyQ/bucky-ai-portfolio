@@ -3,6 +3,12 @@ import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
+      url: "https://buckyqian.com/projects/handwritten-research-agent",
+      lastModified: "2026-10-09",
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
       url: "https://buckyqian.com/",
       lastModified: "2026-10-01",
       changeFrequency: "monthly",
