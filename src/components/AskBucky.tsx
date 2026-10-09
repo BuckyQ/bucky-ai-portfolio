@@ -88,7 +88,8 @@ export default function AskBucky() {
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [successfulQuestions, setSuccessfulQuestions] = useState(0);
   const [dailyLimitReached, setDailyLimitReached] = useState(false);
-  const [inputMode, setInputMode] = useState<"profile" | "document">("profile");
+  const [inputMode, setInputMode] = useState<"profile" | "document" | "research">("profile");
+  const [researchProgress, setResearchProgress] = useState<string[]>([]);
   const [suggestionsExpanded, setSuggestionsExpanded] = useState(true);
   const [temporaryDocument, setTemporaryDocument] =
     useState<TemporaryDocument | null>(null);
@@ -105,7 +106,7 @@ export default function AskBucky() {
   );
   const sessionLimitReached = remainingQuestions === 0;
   const assistantDisabled =
-    !isSessionReady || sessionLimitReached || dailyLimitReached;
+    !isSessionReady || (inputMode !== "research" && (sessionLimitReached || dailyLimitReached));
   const voice = useVoiceQuestion({
     disabled: assistantDisabled || isLoading || isDocumentLoading,
     onTranscript: (transcript) => setQuestion(transcript),
@@ -117,7 +118,7 @@ export default function AskBucky() {
   const inputDisabled =
     assistantDisabled || isLoading || isDocumentLoading || voiceBusy;
   const activeSuggestions =
-    inputMode === "document" ? documentSuggestedQuestions : suggestedQuestions;
+    inputMode === "research" ? ["Compare OpenAI Agents SDK and LangGraph for production AI agents."] : inputMode === "document" ? documentSuggestedQuestions : suggestedQuestions;
 
   useEffect(() => {
     try {
@@ -190,8 +191,39 @@ export default function AskBucky() {
     ]);
     setQuestion("");
     setIsLoading(true);
+    setResearchProgress([]);
 
     try {
+      if (inputMode === "research") {
+        const response = await fetch("/api/agent", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: nextQuestion }), signal: AbortSignal.timeout(115_000),
+        });
+        if (!response.ok) throw new Error((await response.json()).error || "Research unavailable.");
+        if (!response.body) throw new Error("Research stream unavailable.");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let answer = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value, { stream: !done });
+          let boundary: number;
+          while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+            const frame = buffer.slice(0, boundary); buffer = buffer.slice(boundary + 2);
+            const dataLine = frame.split("\n").find(line => line.startsWith("data: "));
+            if (!dataLine) continue;
+            const data = JSON.parse(dataLine.slice(6)) as { status?: string; answer?: string; error?: string };
+            if (data.error) throw new Error(data.error);
+            if (data.status) setResearchProgress(current => [...current, data.status!]);
+            if (data.answer) answer = data.answer;
+          }
+          if (done) break;
+        }
+        if (!answer) throw new Error("Research ended without an answer.");
+        setMessages(current => [...current, { id: nextMessageId("assistant"), role: "assistant", content: answer }]);
+        return;
+      }
       const response = await fetch("/api/ask-bucky", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -361,7 +393,7 @@ export default function AskBucky() {
       <header className="ask-bucky-header">
         <div>
           <span className="ask-bucky-status" aria-hidden="true" />
-          <p>Retrieval system / Profile corpus</p>
+          <p>{inputMode === "research" ? "Research agent / Web evidence" : "Retrieval system / Profile corpus"}</p>
         </div>
         <h2 id="ask-bucky-title">Ask Bucky AI</h2>
       </header>
@@ -391,9 +423,11 @@ export default function AskBucky() {
           >
             Compare a Job / Document
           </button>
+          <button aria-pressed={inputMode === "research"} disabled={isLoading || isDocumentLoading || voiceBusy}
+            onClick={() => { setInputMode("research"); setDocumentError(null); setResearchProgress([]); }} type="button">Research</button>
         </div>
         <p>
-          {inputMode === "document"
+          {inputMode === "research" ? "Live web research / Existing handwritten agent" : inputMode === "document"
             ? "Temporary context / Not stored"
             : "Public profile context"}
         </p>
@@ -568,9 +602,10 @@ export default function AskBucky() {
             ) : null}
           </article>
         ))}
+        {inputMode === "research" && researchProgress.length > 0 ? <ol aria-label="Research progress">{researchProgress.map((status, index) => <li key={index}>{status}</li>)}</ol> : null}
         {isLoading ? (
           <div className="ask-bucky-loading" role="status">
-            <LoaderCircle aria-hidden="true" /> Retrieving verified context
+            <LoaderCircle aria-hidden="true" /> {inputMode === "research" ? "Researching…" : "Retrieving verified context"}
           </div>
         ) : null}
       </div>
@@ -581,7 +616,7 @@ export default function AskBucky() {
       </div>
 
       <form className="ask-bucky-form" onSubmit={handleSubmit}>
-        <label htmlFor="ask-bucky-question">Question about Bucky</label>
+        <label htmlFor="ask-bucky-question">{inputMode === "research" ? "Research question" : "Question about Bucky"}</label>
         <div className="ask-bucky-input">
           <button
             aria-label={
@@ -624,7 +659,7 @@ export default function AskBucky() {
               setQuestion(event.target.value);
               voice.resetStatus();
             }}
-            placeholder={
+            placeholder={inputMode === "research" ? "What would you like to research?" :
               inputMode === "document" && temporaryDocument
                 ? "Compare Bucky's experience with this document..."
                 : "Ask a question about Bucky..."
@@ -645,7 +680,7 @@ export default function AskBucky() {
       </form>
 
       <div className="ask-bucky-usage" id="ask-bucky-remaining" aria-live="polite">
-        {!sessionLimitReached && !dailyLimitReached ? (
+        {inputMode === "research" ? <p>Research / Up to 3 runs per day · 5 rounds per run</p> : !sessionLimitReached && !dailyLimitReached ? (
           <p>
             {remainingQuestions} {remainingQuestions === 1 ? "question" : "questions"} remaining
           </p>

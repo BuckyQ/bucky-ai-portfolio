@@ -2932,3 +2932,13 @@ footer{padding-bottom:clamp(98px,8vw,112px)}
 .research-project-preview p:not(.project-view-label){max-width:60ch;margin:0;color:var(--color-text-secondary);font-size:16px;line-height:1.65}
 @media(max-width:900px){.research-project-preview{grid-template-columns:1fr;gap:22px}.research-project-preview>.project-action{justify-self:start}}
 @media(max-width:520px){.research-project-preview>.project-action{width:100%;justify-content:space-between}}
+
+/* Three assistant modes share the existing drawer on narrow screens. */
+.ask-bucky-modes>div{flex-wrap:wrap}
+.ask-bucky-messages ol[aria-label="Research progress"]{margin:12px 0;padding:14px 28px;border:1px solid var(--color-border);color:var(--color-text-secondary);font:13px/1.8 var(--font-mono)}
+@media(max-width:900px){.ask-bucky-modes>div{grid-template-columns:1fr 1fr 1fr}.ask-bucky-modes button{overflow-wrap:anywhere}}
+
+.ask-bucky-modes{align-items:stretch;flex-direction:column;gap:4px}
+.ask-bucky-modes>div{display:grid;grid-template-columns:1fr 1.4fr .8fr}
+.ask-bucky-modes>p{text-align:left}
+.ask-bucky-drawer .ask-bucky-modes button{min-height:44px;font-size:12px}

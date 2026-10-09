@@ -624,3 +624,14 @@ describe("AskBucky temporary document input", () => {
     ).toBe("");
   });
 });
+
+it("routes Research to the research backend and renders streamed results", async () => {
+  fetchMock.mockResolvedValueOnce(new Response('event: progress\ndata: {"status":"Searching"}\n\nevent: result\ndata: {"answer":"A real research result"}\n\n', { headers: { "Content-Type": "text/event-stream" } }));
+  render(<AskBucky />);
+  fireEvent.click(screen.getByRole("button", { name: /^Research$/ }));
+  fireEvent.change(screen.getByLabelText("Research question"), { target: { value: "Compare SDKs" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send question to Ask Bucky AI" }));
+  await waitFor(() => expect(screen.getByText("A real research result")).toBeTruthy());
+  expect(fetchMock).toHaveBeenCalledWith("/api/agent", expect.objectContaining({ body: JSON.stringify({ query: "Compare SDKs" }) }));
+  expect(screen.getByText("Searching")).toBeTruthy();
+});

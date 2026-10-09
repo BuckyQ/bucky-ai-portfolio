@@ -136,3 +136,13 @@ The project page includes an interactive, deterministic control-flow walkthrough
 ## Portfolio navigation
 
 The homepage presents concise project summaries, architecture visuals, and links to dedicated project pages. The research-agent graph is rendered only on `/projects/handwritten-research-agent`; the homepage contains a preview and a direct demo link. Job-agent engineering details and RAG evaluation explanations remain on their case-study pages.
+
+## Live Research mode
+
+Open Ask Bucky AI and select Research. About Bucky and document comparison still use `/api/ask-bucky`; Research posts `{ "query": "..." }` to `/api/agent`. This Node route invokes `runAgent` in `src/lib/agent/run.ts` and streams high-level SSE progress plus the final answer. The project graph remains an illustrative walkthrough.
+
+The server modules in `src/lib/agent` are adapted from `jev-agent-practice`: the decision layer, schemas, actions, evidence, analysis, five-attempt loop and fallback are preserved. Adaptations replace CLI logging and hardcoded query with request input, lazy server credentials, compatible Responses models and cancellation.
+
+Required server environment: `OPENAI_API_KEY` and the existing shared rate-limit backend (Supabase or Upstash) in production. Optional `RESEARCH_MODEL` defaults to `gpt-4.1-mini`. No public key or new database schema is needed. A paused Supabase backend causes HTTP 503; restore that existing project to enable production research. Research has a separate quota of three runs per IP per day, maximum five rounds, a 110-second request deadline, and no stored query/history. Failed attempted runs still consume quota to bound cost.
+
+Local verification: `npm run dev`, open `http://localhost:3000`, open Ask Bucky AI, select Research, and submit a query. Inspect `/api/agent` in Network: `progress` events followed by `result`. Also test the two existing modes. Run `npx tsc --noEmit`, `npm run lint`, `npm test`, and `npm run build` before deployment.

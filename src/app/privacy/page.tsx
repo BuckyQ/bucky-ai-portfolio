@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         <p className="section-label">Data note / Ask Bucky AI</p>
         <h1>Privacy, kept <em>plain.</em></h1>
         <p>
-          Ask Bucky is a portfolio demo. It uses submitted questions and any
+          Research mode sends your query through the server to OpenAI and its web search tool. The application does not persist research queries, intermediate analyses, or results. Research rate limiting stores a hashed client identifier and usage count separately from profile questions. Ask Bucky is a portfolio demo. It uses submitted questions and any
           temporary context you choose to provide to generate grounded answers.
         </p>
       </header>
