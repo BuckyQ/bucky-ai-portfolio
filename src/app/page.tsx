@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { ArrowDown, ArrowUpRight, Menu, Pause, Play, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ResearchAgentGraph from "@/components/ResearchAgentGraph";
 import AskBuckyLauncher from "@/components/AskBuckyLauncher";
 import ElectronicOcean from "@/components/ElectronicOcean";
 import {
@@ -670,7 +671,9 @@ export default function Home() {
           <ProjectReveal className="selected-work-header">
             <p className="section-label">02 / Selected Work</p>
             <h2 id="selected-work-title">Selected work.</h2>
-            <p>Production AI product work, agent orchestration, and retrieval evaluation.</p>
+            <p>Production AI product work, agent orchestration, and retrieval evaluation.
+              <a className="selected-work-demo-link" href="#research-demo">Explore the interactive research agent <ArrowDown aria-hidden="true" /></a>
+            </p>
           </ProjectReveal>
 
           <article className="work-project topify-project" aria-labelledby="topify-title">
@@ -790,6 +793,13 @@ export default function Home() {
                 </a>
               </div>
             </ProjectReveal>
+            <section className="homepage-research-demo" id="research-demo" aria-labelledby="research-demo-title">
+              <p className="project-view-label">Handwritten agent / Interactive walkthrough</p>
+              <h4 id="research-demo-title">See the research loop in action.</h4>
+              <p>Step through decisions, web searches, analysis, and replanning in a small TypeScript agent. This walkthrough uses illustrative data.</p>
+              <ResearchAgentGraph />
+              <div className="project-actions"><a className="project-action" href="/projects/handwritten-research-agent">Project details + source <ArrowUpRight aria-hidden="true" /></a></div>
+            </section>
           </article>
 
           <article className="work-project rag-project" aria-labelledby="rag-title">
