@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ResearchAgentGraph from "@/components/ResearchAgentGraph";
 import { ArrowUpRight } from "lucide-react";
 
 const title = "Handwritten Research Agent | Bucky Qian";
@@ -10,13 +11,6 @@ export const metadata: Metadata = {
   openGraph: { type: "website", title, description, url, siteName: "Bucky Qian", images: ["/hero-signal-poster.jpg"] },
   twitter: { card: "summary_large_image", title, description, images: ["/hero-signal-poster.jpg"] },
 };
-
-const stages = [
-  ["01", "Decide", "Choose continue, search more, replan, or generate through a Zod-validated response."],
-  ["02", "Route", "Use a confidence threshold of 0.6 to accept the action or request replanning."],
-  ["03", "Execute", "Search the web, analyze evidence, replace the plan, or generate an answer."],
-  ["04", "Update", "Keep evidence, analyses, the step pointer, and the answer in one shared state."],
-];
 
 export default function HandwrittenResearchAgentPage() {
   return (
@@ -38,7 +32,7 @@ export default function HandwrittenResearchAgentPage() {
         <p className="section-label">Control loop / 01</p>
         <div className="case-study-section-content">
           <h2 id="research-loop-title">Decide. Execute. Update. Repeat.</h2>
-          <ol className="case-agent-flow">{stages.map(([index, name, detail]) => <li key={index}><span>{index}</span><div><h3>{name}</h3><p>{detail}</p></div></li>)}</ol>
+          <ResearchAgentGraph />
         </div>
       </section>
       <section className="case-study-section" aria-labelledby="research-decisions-title">

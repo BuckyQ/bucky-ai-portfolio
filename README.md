@@ -130,3 +130,5 @@ becomes a larger product.
 ## Handwritten Research Agent
 
 `/projects/handwritten-research-agent` introduces Bucky's small TypeScript research-agent learning project. The source snapshot and README live in `public/projects/handwritten-research-agent/`. The ZIP includes only source, dependency manifests, setup documentation, and a blank `.env.example`; it does not include secrets or installed dependencies. It is a downloadable CLI project, not a hosted agent API. Refresh the source snapshot when the original project changes.
+
+The project page includes an interactive, deterministic control-flow walkthrough with play/pause, single-step controls, node inspection, and state counters. Its trace is illustrative and does not execute the agent or make API requests.
