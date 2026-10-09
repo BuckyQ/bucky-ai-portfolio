@@ -274,6 +274,7 @@ export default function AskBucky() {
         });
       }
     } catch (error) {
+      if (inputMode === "research") setResearchProgress(current => [...current, "Error"]);
       setMessages((current) => [
         ...current,
         {
