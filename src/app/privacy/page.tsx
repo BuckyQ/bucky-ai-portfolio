@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         <p className="section-label">Data note / Ask Bucky AI</p>
         <h1>Privacy, kept <em>plain.</em></h1>
         <p>
-          Research mode sends your query through the server to OpenAI and its web search tool. The application does not persist research queries, intermediate analyses, or results. Research rate limiting stores a hashed client identifier and usage count separately from profile questions. Ask Bucky is a portfolio demo. It uses submitted questions and any
+          Research mode sends your query through the server to OpenAI and its web search tool. The application does not persist research queries, intermediate analyses, or results. Research rate limiting stores a hashed client identifier and usage count separately from profile questions. The Job Intelligence BYOK demo sends the key, company query, job description, and resume evidence directly from your browser to OpenAI. This website receives none of that key or document data. The key is held in memory only for the active run, cleared from the form on submission, and never saved in browser storage. OpenAI API charges and its retention policies apply. Ask Bucky is a portfolio demo. It uses submitted questions and any
           temporary context you choose to provide to generate grounded answers.
         </p>
       </header>

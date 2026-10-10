@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00.000 --> 00:30.000
+A real recorded run: a hypothetical AI Product Engineer brief, Topify company research, and public resume evidence. Replay makes no API calls.
+
+00:30.000 --> 00:50.000
+Company Research collects official sources. A source URL is a review starting point, not a guarantee that every claim is supported.
+
+00:50.000 --> 01:10.000
+Resume Analyzer maps supplied evidence to role requirements and highlights gaps instead of inventing experience.
+
+01:10.000 --> 01:30.000
+Strategy Agent produces a reviewable interview plan, preparation tasks, and questions to ask.
+
+01:30.000 --> 01:50.000
+Eight stages: User, Triage, Planner, Company Research, Job Analyzer, Resume Analyzer, Strategy Agent, Interview Plan.
+
+01:50.000 --> 02:00.000
+This recorded run passes 7 of 8 boundary and coverage checks. An unverified location claim still needs review; this is not an accuracy benchmark.

@@ -24,7 +24,7 @@ const responses: OfflineResponseDefinition[] = [
       /^give me an overview of bucky$/,
     ],
     answer:
-      "Bucky Qian is an Applied AI Engineer with more than four years of production software experience across Apple and Topify AI. He combines frontend product engineering with hands-on work in AI agents, retrieval-augmented generation, evaluation, and production LLM interfaces.",
+      "Bucky Qian is an AI Product Engineer with more than four years of production software experience across Apple and Topify AI. He combines frontend product engineering with hands-on work in AI agents, retrieval-augmented generation, evaluation, and production LLM interfaces.",
   },
   {
     kind: "topify",

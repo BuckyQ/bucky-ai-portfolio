@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-10T21:45:23.889Z",
+  "method": "Deterministic presence and boundary checks on one recorded run. These are not factual accuracy, faithfulness, or human-reviewed scores.",
+  "references": [
+    {
+      "url": "https://topify.ai/",
+      "checkedOn": "2026-10-10",
+      "facts": [
+        "Topify describes a GEO platform for AI search visibility.",
+        "Its homepage lists ChatGPT, Gemini, Perplexity, and Google AI Overview."
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "check": "Original role + hypothetical-vacancy label",
+      "passed": true
+    },
+    {
+      "check": "Explicit requirements separated from hypotheses",
+      "passed": true
+    },
+    {
+      "check": "Official company source URLs present",
+      "passed": true
+    },
+    {
+      "check": "GEO product reference covered",
+      "passed": true
+    },
+    {
+      "check": "Tracked-engine reference covered",
+      "passed": true
+    },
+    {
+      "check": "Job technology not asserted as company stack",
+      "passed": true
+    },
+    {
+      "check": "Unverified headquarters claim excluded",
+      "passed": false
+    },
+    {
+      "check": "Resume evidence gaps are surfaced",
+      "passed": true
+    }
+  ],
+  "passed": 7,
+  "total": 8,
+  "knownLimitations": [
+    "Role and evidence boundaries can still drift across model stages.",
+    "A claim with a source URL is not automatically supported by that source.",
+    "This single demonstration is not a representative benchmark or a blind human evaluation."
+  ]
+}

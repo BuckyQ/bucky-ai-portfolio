@@ -1,3 +1,7 @@
+# Current user-approved brief — 2026-10-10
+
+This brief supersedes the older single-page architecture below. Position Bucky as **AI Product Engineer**. Homepage contains only hero, three compact cards (Job Agent, MiniRAG, Topify), and contact/footer. Profile and Background live at `/about`; all projects are reachable from `/projects`. Preserve the live chatbot, the distinct job-agent showcase, and their cross-links. Only label genuine recorded executions as real runs; do not invent videos, references, scores, or runtime implementations.
+
 # Bucky Qian Portfolio - Agent Rules
 
 These instructions apply to every AI-assisted change in this repository. Read
@@ -11,10 +15,10 @@ sites, updated copy, or a direct instruction that supersedes it.
 
 ### Candidate Positioning
 
-- Bucky Qian is a frontend engineer transitioning into an Applied AI Engineer.
+- Bucky Qian is a frontend engineer transitioning into an AI Product Engineer.
 - The portfolio must make the transition credible rather than hiding the
   frontend background. Frontend product craft is part of the differentiator.
-- The core positioning is: an Applied AI Engineer who can build the AI system
+- The core positioning is: an AI Product Engineer who can build the AI system
   and turn it into a polished product people can use.
 - The primary audience is recruiters, hiring managers, engineering leaders,
   founders, and potential collaborators hiring for Applied AI roles.
@@ -75,7 +79,7 @@ merge content that does not strengthen one of those three points.
   statement, Applied AI focus panel, two clear actions (`View Selected Work`
   and `Ask Bucky AI`), and clear contact destination. The resume remains
   available in Contact.
-- The headline must communicate Bucky's name or Applied AI Engineer identity;
+- The headline must communicate Bucky's name or AI Product Engineer identity;
   supporting copy should explain the frontend-to-AI transition.
 - Preserve the current hero copy hierarchy: `Bucky Qian builds` followed by
   the editorial italic line `AI people can use.` The supporting paragraph must
@@ -254,7 +258,7 @@ merge content that does not strengthen one of those three points.
   very bottom. The CTA must sit above that footer row and must never share an
   absolute bottom-left position with the metadata.
 - Keep the footer minimal and retain enough identity context to associate it
-  with Bucky Qian and Applied AI Engineering. Do not add a lead form, signal
+  with Bucky Qian and AI Product Engineering. Do not add a lead form, signal
   circle, or decorative system graphic.
 - Keep the machine-readable freshness label `LAST UPDATED / SEP 2026` in the
   ruled footer metadata row and back it with a semantic `time` element using
@@ -277,7 +281,7 @@ merge content that does not strengthen one of those three points.
 ## Product Intent
 
 This site is Bucky Qian's interactive portfolio and resume. Its central story
-is the transition from Frontend Engineer to Applied AI Engineer. Every change
+is the transition from Frontend Engineer to AI Product Engineer. Every change
 should strengthen both sides of that story:
 
 - Strong product craft, interaction design, accessibility, and frontend depth.
@@ -554,7 +558,7 @@ engines and answer engines even when JavaScript, animation, or canvas effects
 are unavailable.
 
 The discoverability goal is specific: when a recruiter or hiring manager
-searches for Bucky Qian, his verified profiles, Applied AI Engineer experience,
+searches for Bucky Qian, his verified profiles, AI Product Engineer experience,
 frontend background, AI agents, RAG, or relevant project work, the portfolio
 should clearly identify the right person and provide enough evidence to judge
 role fit. Optimize for accurate entity recognition and useful answers, not raw
@@ -579,7 +583,7 @@ traffic or broad high-volume keywords.
 - Do not use keyword stuffing, hidden text, doorway pages, fake freshness, or
   duplicated location pages.
 - Naturally include relevant role language where supported by real experience:
-  `Bucky Qian`, `Applied AI Engineer`, `Frontend Engineer`, `AI Agents`,
+  `Bucky Qian`, `AI Product Engineer`, `Frontend Engineer`, `AI Agents`,
   `Retrieval-Augmented Generation`, `LLM applications`, `TypeScript`, and
   `Mountain View, California`. Do not repeat these phrases mechanically.
 - Metadata should be written for a recruiter scanning search results: identify
@@ -595,13 +599,13 @@ traffic or broad high-volume keywords.
   unsupported ratings, awards, employers, job titles, dates, metrics, or
   `sameAs` profiles.
 - Keep the core entity consistent across page copy, metadata, JSON-LD, social
-  previews, and resume content: Bucky Qian, Applied AI Engineer, Mountain View,
+  previews, and resume content: Bucky Qian, AI Product Engineer, Mountain View,
   California, with the verified GitHub and LinkedIn URLs in this file.
 - Use stable project names and terminology across headings, descriptions,
   metadata, and structured data so search and answer engines can connect each
   project to the same entity.
 - Treat `https://buckyqian.com` as the canonical production URL. Use
-  `Bucky Qian | Applied AI Engineer` as the page title and `Bucky Qian` as the
+  `Bucky Qian | AI Product Engineer` as the page title and `Bucky Qian` as the
   site and person entity name across metadata, Open Graph, and schema.
 - Keep the entity IDs stable as `https://buckyqian.com/#website`,
   `https://buckyqian.com/#profile`, and `https://buckyqian.com/#person`.

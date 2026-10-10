@@ -4,7 +4,7 @@ import ResearchAgentGraph from "@/components/ResearchAgentGraph";
 import { ArrowUpRight } from "lucide-react";
 
 const title = "Handwritten Research Agent | Bucky Qian";
-const description = "A small TypeScript research agent with an explicit control loop, structured decisions, web search, analysis, and replanning.";
+const description = "Research questions need evidence checks and follow-up searches before a final answer. This handwritten agent makes that loop explicit.";
 const url = "https://buckyqian.com/projects/handwritten-research-agent";
 export const metadata: Metadata = {
   title, description, alternates: { canonical: url },
@@ -22,7 +22,7 @@ export default function HandwrittenResearchAgentPage() {
       <header id="agent-summary" className="mini-rag-intro project-case-intro">
         <p className="section-label">Learning project / TypeScript</p>
         <h1>A small agent.<br /><em>An explicit control loop.</em></h1>
-        <p>I built a handwritten research agent to understand how decisions, tools, state, and replanning work together. TypeScript controls the loop; the OpenAI client handles model calls and web search; Zod defines structured output contracts.</p>
+        <p>A first search rarely covers every part of a research question. This agent checks collected evidence, searches for what is missing, and replans before producing an answer. TypeScript controls the loop, the OpenAI client handles model calls and web search, and Zod defines the decision contracts.</p>
         <div className="case-intro-actions">
           <a href="#agent-graph">Explore interactive graph <ArrowUpRight aria-hidden="true" /></a>
           <a href="/projects/handwritten-research-agent/handwritten-research-agent.zip" download>Download source <ArrowUpRight aria-hidden="true" /></a>
@@ -54,7 +54,7 @@ export default function HandwrittenResearchAgentPage() {
         <p>This is a command-line prototype. Calculation is a placeholder; state is in memory; there is no formal evaluation suite or application-level retry policy. Model confidence is a routing heuristic, and fallback answers can be incomplete. The downloadable source includes setup instructions and a blank environment template.</p>
         <div className="project-actions"><Link className="project-action" href="/projects/ai-job-intelligence">AI Job Intelligence case study <ArrowUpRight aria-hidden="true" /></Link><Link className="project-action" href="/#contact">Contact Bucky <ArrowUpRight aria-hidden="true" /></Link></div>
       </section>
-      <footer className="mini-rag-footer"><span>Bucky Qian / Applied AI Engineer</span><Link href="/">Return to portfolio</Link></footer>
+      <footer className="mini-rag-footer"><span>Bucky Qian / AI Product Engineer</span><Link href="/">Return to portfolio</Link></footer>
     </main>
   );
 }

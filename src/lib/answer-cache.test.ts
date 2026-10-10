@@ -102,13 +102,13 @@ describe("prepareAnswerCache", () => {
 
     if (owner.status !== "owner") throw new Error("Expected cache owner.");
     await owner.lease.store({
-      answer: "Bucky is an Applied AI Engineer.",
+      answer: "Bucky is an AI Product Engineer.",
       sources: [source],
     });
 
     await expect(waiter).resolves.toMatchObject({
       status: "hit",
-      value: { answer: "Bucky is an Applied AI Engineer." },
+      value: { answer: "Bucky is an AI Product Engineer." },
     });
   });
 

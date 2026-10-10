@@ -7,7 +7,7 @@ import AskBucky from "@/components/AskBucky";
 const pageUrl = "https://buckyqian.com/projects/mini-rag";
 const pageTitle = "RAG + Evaluation System | Bucky Qian";
 const pageDescription =
-  "A TypeScript retrieval-augmented generation system with chunking, cosine retrieval, grounded generation, and evaluation.";
+  "Accurate answers about Bucky’s experience, grounded in profile evidence and evaluated for retrieval and answer quality.";
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -55,7 +55,7 @@ const engineeringDetails = [
 
 export default function MiniRagPage() {
   return (
-    <main className="mini-rag-page">
+    <main className="mini-rag-page mini-rag-live-page">
       <nav className="mini-rag-nav" aria-label="MiniRAG navigation">
         <Link href="/">Bucky Qian</Link>
         <span>RAG system / 02.3</span>
@@ -70,9 +70,7 @@ export default function MiniRagPage() {
           <em>where it failed.</em>
         </h1>
         <p>
-          I built a TypeScript retrieval-augmented generation system that separates
-          retrieval quality from answer quality, then exposes the same pipeline through
-          the Ask Bucky portfolio assistant.
+          Recruiters need accurate answers about my experience without searching a long resume. Ask Bucky retrieves verified profile evidence, answers with sources, and separates retrieval quality from answer quality.
         </p>
         <div className="case-intro-actions">
           <a href="#live-demo">Try live demo <ArrowDown aria-hidden="true" /></a>
@@ -80,6 +78,16 @@ export default function MiniRagPage() {
         </div>
       </header>
 
+      <section className="case-demo" id="live-demo" aria-labelledby="case-demo-title">
+        <div className="case-demo-heading">
+          <p className="section-label">Live system / 03</p>
+          <h2 id="case-demo-title">Try the retrieval loop.</h2>
+          <p>Ask about Bucky&apos;s experience, projects, skills, or education. Successful answers show the profile sources used.</p>
+        </div>
+        <AskBucky />
+      </section>
+
+      <p className="project-cross-link">Single-step version of the same RAG + eval stack — see the multi-step version: <Link href="/projects/ai-job-intelligence">AI Job Intelligence Agent →</Link></p>
       <div className="mini-rag-pipeline" aria-label="MiniRAG pipeline">
         {pipeline.map((stage, index) => (
           <div key={stage}>
@@ -128,17 +136,10 @@ export default function MiniRagPage() {
         </div>
       </section>
 
-      <section className="case-demo" id="live-demo" aria-labelledby="case-demo-title">
-        <div className="case-demo-heading">
-          <p className="section-label">Live system / 03</p>
-          <h2 id="case-demo-title">Try the retrieval loop.</h2>
-          <p>Ask about Bucky&apos;s experience, projects, skills, or education. Successful answers show the profile sources used.</p>
-        </div>
-        <AskBucky />
-      </section>
+
 
       <div className="mini-rag-footer">
-        <span>Bucky Qian / Applied AI Engineer</span>
+        <span>Bucky Qian / AI Product Engineer</span>
         <div>
           <Link href="/privacy">Privacy</Link>
           <Link href="/">Return to portfolio</Link>

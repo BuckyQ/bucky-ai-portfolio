@@ -2,7 +2,7 @@
 
 ## Overview
 
-Bucky Qian is a software engineer transitioning into Applied AI Engineering. He has more than four years of experience building production software across Apple and an AI-focused startup.
+Bucky Qian is a software engineer focused on AI product engineering. He has more than four years of experience building production software across Apple and an AI-focused startup.
 
 His strongest engineering background is in TypeScript, JavaScript, React, Next.js, and frontend product development. He is currently focused on building production-style AI applications, especially AI agents, retrieval-augmented generation (RAG) systems, LLM-powered workflows, retrieval systems, and evaluation pipelines.
 
@@ -10,10 +10,9 @@ His strongest engineering background is in TypeScript, JavaScript, React, Next.j
 
 Bucky is targeting roles such as:
 
-- Applied AI Engineer
+- AI Product Engineer
 - AI Engineer
 - AI Agent Engineer
-- AI Product Engineer
 - Full-Stack AI Engineer
 - LLM Application Engineer
 

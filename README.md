@@ -146,3 +146,13 @@ The server modules in `src/lib/agent` are adapted from `jev-agent-practice`: the
 Required server environment: `OPENAI_API_KEY` and the existing shared rate-limit backend (Supabase or Upstash) in production. Optional `RESEARCH_MODEL` defaults to `gpt-4.1-mini`. No public key or new database schema is needed. A paused Supabase backend causes HTTP 503; restore that existing project to enable production research. Research has a separate quota of three runs per IP per day, maximum five rounds, a 110-second request deadline, and no stored query/history. Failed attempted runs still consume quota to bound cost.
 
 Local verification: `npm run dev`, open `http://localhost:3000`, open Ask Bucky AI, select Research, and submit a query. Inspect `/api/agent` in Network: `progress` events followed by `result`. Also test the two existing modes. Run `npx tsc --noEmit`, `npm run lint`, `npm test`, and `npm run build` before deployment.
+
+## Portfolio architecture (2026-10-10)
+
+Positioning: AI Product Engineer. `/` is a compact entry page; `/about` carries profile and background; `/projects` lists all four projects; `/projects/topify` carries the existing public product visuals. MiniRAG's live chat is immediately after its introduction, and MiniRAG and Job Intelligence link to each other.
+
+Job Intelligence now has a browser-only BYOK workflow in `src/lib/job-agent.ts`: User → Triage → Planner → parallel Company Research / Job Analyzer → Resume Analyzer → Strategy Agent → Interview Plan. It makes six Responses calls plus hosted web search, stores no credentials, and makes no requests to a portfolio backend. Keys are cleared from the input when a run starts; a three-minute cancellation deadline bounds runs. The server's existing research agent is separate and unchanged.
+
+The recorded-run JSON is a genuine execution using a clearly hypothetical vacancy and selected public resume evidence. Replay itself makes no API calls. `scripts/record-job-demo.ts` can reproduce it with a local server environment key; never include credentials in fixtures. `scripts/evaluate-job-demo.ts` regenerates deterministic reference/boundary checks. The report and failure traces show actual limitations; no blind human evaluation or broad accuracy score is claimed.
+
+The two-minute `public/projects/ai-job-intelligence/demo.mp4` is a screen recording of the real-run replay and evidence inspection (not a new live run). English captions and the downloadable run JSON are provided beside the demo.

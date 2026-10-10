@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = "https://buckyqian.com";
-const siteTitle = "Bucky Qian | Applied AI Engineer";
+const siteTitle = "Bucky Qian | AI Product Engineer";
 const siteDescription =
-  "Applied AI Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.";
+  "AI Product Engineer building AI agents, RAG systems, LLM applications, and production software with TypeScript.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
         url: "/hero-signal-poster.jpg",
         width: 1280,
         height: 720,
-        alt: "Bucky Qian Applied AI Engineer portfolio over a dark cinematic ocean.",
+        alt: "Bucky Qian AI Product Engineer portfolio over a dark cinematic ocean.",
       },
     ],
   },

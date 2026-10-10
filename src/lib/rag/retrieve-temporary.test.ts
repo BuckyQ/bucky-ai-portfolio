@@ -9,7 +9,7 @@ const document: TemporaryDocument = {
   fileName: "job-description.txt",
   mimeType: "text/plain",
   size: 180,
-  text: `Applied AI Engineer role.
+  text: `AI Product Engineer role.
 The candidate will build retrieval systems and evaluate RAG quality.
 Kubernetes experience is required for production deployment.`,
 };
